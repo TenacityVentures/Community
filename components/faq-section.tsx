@@ -96,9 +96,9 @@ export default function FAQSection() {
             Frequently Asked Questions
           </div>
           <div className="w-full text-[#605A57] text-base font-normal leading-7 font-sans">
-            Explore your data, build your dashboard,
+            We build fast. We learn faster.
             <br className="hidden md:block" />
-            bring your team together.
+            We move forward — always.
           </div>
         </div>
 

@@ -1,7 +1,10 @@
 "use client"
 
-import { useState } from "react"
-import { motion, AnimatePresence} from 'framer-motion'
+import type React from "react"
+
+import { useState, useRef } from "react"
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion"
+import { AnimatePresence } from "framer-motion"
 
 export function HeroSection() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -12,11 +15,37 @@ export function HeroSection() {
   const [engagementType, setEngagementType] = useState("")
   const [bio, setBio] = useState("")
 
+  const heroRef = useRef<HTMLDivElement>(null)
+  const mouseX = useMotionValue(0)
+  const mouseY = useMotionValue(0)
+
+  const rotateX = useSpring(useTransform(mouseY, [-300, 300], [5, -5]), {
+    stiffness: 150,
+    damping: 20,
+  })
+  const rotateY = useSpring(useTransform(mouseX, [-300, 300], [-5, 5]), {
+    stiffness: 150,
+    damping: 20,
+  })
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!heroRef.current) return
+    const rect = heroRef.current.getBoundingClientRect()
+    const centerX = rect.left + rect.width / 2
+    const centerY = rect.top + rect.height / 2
+    mouseX.set(e.clientX - centerX)
+    mouseY.set(e.clientY - centerY)
+  }
+
+  const handleMouseLeave = () => {
+    mouseX.set(0)
+    mouseY.set(0)
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
     try {
-      // Replace with your n8n webhook URL
       const webhookUrl = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL || "YOUR_N8N_WEBHOOK_URL"
 
       const response = await fetch(webhookUrl, {
@@ -35,7 +64,6 @@ export function HeroSection() {
 
       if (response.ok) {
         setStep(4)
-        // Reset form after a delay
         setTimeout(() => {
           setName("")
           setEmail("")
@@ -62,11 +90,31 @@ export function HeroSection() {
   }
 
   return (
-    <section className="relative pb-16 flex flex-col justify-center items-center w-full mt-18 md:mt-0">
-      {/* Hero Text */}
-      <div className="text-center max-w-2xl">
+    <section className="relative pb-16 flex flex-col justify-center items-center w-full mt-12 md:mt-0">
+      <motion.div
+        ref={heroRef}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        style={{
+          rotateX,
+          rotateY,
+          transformStyle: "preserve-3d",
+        }}
+        className="text-center max-w-2xl"
+      >
         <h1 className="text-4xl sm:text-6xl md:text-7xl font-serif font-normal text-[#37322F] leading-tight mb-4">
-          An Ecosystem for Ventures, <span className="bg-[#37322f]/5 p-2 rounded-md">Builders</span> and Stories.
+          <MagneticText>An Ecosystem for Ventures,</MagneticText>{" "}
+          <motion.span
+            drag
+            dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+            dragElastic={0.7}
+            dragTransition={{ bounceStiffness: 600, bounceDamping: 20 }}
+            className="bg-[#37322f]/5 p-2 rounded-md inline-block cursor-grab active:cursor-grabbing"
+            whileDrag={{ scale: 1.05 }}
+          >
+            Builders
+          </motion.span>{" "}
+          <MagneticText>and Stories.</MagneticText>
         </h1>
         <p className="text-[#605A57] text-sm sm:text-base md:text-lg mb-6">
           We're building something extraordinary. Join the movement of founders and builders creating Africa's future.
@@ -78,9 +126,8 @@ export function HeroSection() {
         >
           Join for free
         </button>
-      </div>
+      </motion.div>
 
-      {/* Modal */}
       <AnimatePresence>
         {isModalOpen && (
           <motion.div
@@ -107,7 +154,6 @@ export function HeroSection() {
               </button>
 
               <AnimatePresence mode="wait">
-                {/* Step 1: Name and Email */}
                 {step === 1 && (
                   <motion.div
                     key="step1"
@@ -146,7 +192,6 @@ export function HeroSection() {
                   </motion.div>
                 )}
 
-                {/* Step 2: Choose Engagement Type */}
                 {step === 2 && (
                   <motion.div
                     key="step2"
@@ -214,7 +259,6 @@ export function HeroSection() {
                   </motion.div>
                 )}
 
-                {/* Step 3: Tell Us More (Bio - Optional) */}
                 {step === 3 && (
                   <motion.div
                     key="step3"
@@ -252,7 +296,6 @@ export function HeroSection() {
                   </motion.div>
                 )}
 
-                {/* Step 4: Welcome Message */}
                 {step === 4 && (
                   <motion.div
                     key="step4"
@@ -272,5 +315,51 @@ export function HeroSection() {
         )}
       </AnimatePresence>
     </section>
+  )
+}
+
+function MagneticText({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLSpanElement>(null)
+  const x = useMotionValue(0)
+  const y = useMotionValue(0)
+
+  const springConfig = { damping: 20, stiffness: 150 }
+  const xSpring = useSpring(x, springConfig)
+  const ySpring = useSpring(y, springConfig)
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLSpanElement>) => {
+    if (!ref.current) return
+    const rect = ref.current.getBoundingClientRect()
+    const centerX = rect.left + rect.width / 2
+    const centerY = rect.top + rect.height / 2
+    const distanceX = e.clientX - centerX
+    const distanceY = e.clientY - centerY
+    const distance = Math.sqrt(distanceX ** 2 + distanceY ** 2)
+
+    if (distance < 150) {
+      const strength = (150 - distance) / 150
+      x.set(distanceX * strength * 0.3)
+      y.set(distanceY * strength * 0.3)
+    }
+  }
+
+  const handleMouseLeave = () => {
+    x.set(0)
+    y.set(0)
+  }
+
+  return (
+    <motion.span
+      ref={ref}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        x: xSpring,
+        y: ySpring,
+        display: "inline-block",
+      }}
+    >
+      {children}
+    </motion.span>
   )
 }
