@@ -188,7 +188,7 @@ export function EthosScrollCards({ activeCard, onCardClick }: EthosScrollCardsPr
                 <motion.img
                   src={card.src}
                   alt={card.alt}
-                  className={`w-full ${card.src === '/david-samuel-peter.png' ? 'h-2/4' : 'h-full'} object-cover object-center md:object-bottom`}
+                  className={`w-full ${card.src === '/david-samuel-peter.png' ? 'h-2/4' : card.src === '/story-page.png' ? 'h-2/5' : 'h-full'} object-cover ${card.src == '/ethosone-boldness-over-perfection.png' ? 'md:h-full' : 'md:h-3/4'} ${card.src === '/ethosone-boldness-over-perfection.png' ? 'object-bottom' : 'object-center'}`}
                   style={{
                     x: isActive ? parallaxX : 0,
                     y: isActive ? parallaxY : 0,
