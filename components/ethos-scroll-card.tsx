@@ -39,7 +39,7 @@ export function EthosScrollCards({ activeCard, onCardClick }: EthosScrollCardsPr
       description: "Bold Builders and Narratives at Tenacity",
     },
     {
-      src: "/data-visualization-dashboard-with-interactive-char.jpg",
+      src: "/story-page.png",
       alt: "Fearless Ventures and Products",
       description: "Fearless Ventures and Products",
     },
