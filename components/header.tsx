@@ -16,10 +16,7 @@ export function Header() {
     e.preventDefault()
     setIsSubmitting(true)
     try {
-      // Replace with your n8n webhook URL
-      const webhookUrl = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL || "YOUR_N8N_WEBHOOK_URL"
-
-      const response = await fetch(webhookUrl, {
+      const response = await fetch('/api/join', {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
