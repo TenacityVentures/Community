@@ -22,7 +22,7 @@ const crimsonPro = Crimson_Pro({
 export const metadata: Metadata = {
   title: "10na.city — the city where builders belong.",
   description:
-    "We're building something extraordinary. Join the movement of founders and builders creating Africa's future.",
+    "An Ecosystem for Ventures, Builders and Stories. Join the movement of founders and builders creating Africa's future.",
   keywords: "venture studio, african tech, startup, software development, AI automation, product development",
   authors: [{ name: "David Paul Conteh" }],
   icons: {

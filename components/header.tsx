@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
+import Link from "next/link"
 
 
 export function Header() {
@@ -63,11 +64,11 @@ export function Header() {
       <div className="max-w-[1060px] mx-auto px-4">
         <nav className="flex items-center justify-between py-4">
           <div className="flex items-center space-x-8">
-            <div className="text-[#37322f] font-semibold text-lg">Tenacity</div>
+            <Link href={'/'} className="text-[#37322f] font-semibold text-lg cursor-pointer">Tenacity</Link>
             <div className="hidden md:flex items-center space-x-6">
-              <button className="text-[#37322f] hover:text-[#37322f]/80 text-sm font-medium">Ventures</button>
-              <button className="text-[#37322f] hover:text-[#37322f]/80 text-sm font-medium">Services</button>
-              <button className="text-[#37322f] hover:text-[#37322f]/80 text-sm font-medium">Manifesto</button>
+              <Link href={'/ventures'} className="cursor-pointer"><button className="text-[#37322f] hover:text-[#37322f]/80 text-sm font-medium cursor-pointer">Ventures</button></Link>
+              <Link href={'/services'} className="cursor-pointer"><button className="text-[#37322f] hover:text-[#37322f]/80 text-sm font-medium cursor-pointer">Services</button></Link>
+              <Link href={'/manifesto'} className="cursor-pointer"><button className="text-[#37322f] hover:text-[#37322f]/80 text-sm font-medium cursor-pointer">Manifesto</button></Link>
             </div>
           </div>
           <Button variant="ghost" className="text-[#37322f] cursor-pointer hover:bg-[#37322f]/5" 
