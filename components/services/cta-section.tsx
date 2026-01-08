@@ -3,12 +3,17 @@
 import type React from "react"
 import { useRef, useState } from "react"
 import { motion, useInView } from "framer-motion"
-import { ServiceInquiryModal } from "./service-inquiry-modal"
+import { StartProjectModal } from "./start-project-modal"
 
 export function CTASection() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(containerRef, { once: true, margin: "-100px" })
+
+  const openCalendly = () => {
+    const calendlyUrl = "https://calendly.com/tenacity-ventures"
+    window.open(calendlyUrl, "_blank")
+  }
 
   return (
     <section ref={containerRef} className="w-full py-20 sm:py-32 md:py-40 relative overflow-hidden">
@@ -52,7 +57,7 @@ export function CTASection() {
               Start a project
             </motion.button>
             <motion.button
-              onClick={() => setIsModalOpen(true)}
+              onClick={openCalendly}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="border-2 border-[#37322F] text-[#37322F] px-10 py-5 rounded-full font-medium text-lg hover:bg-[#37322F] hover:text-white transition-all duration-300"
@@ -73,8 +78,8 @@ export function CTASection() {
         </motion.div>
       </div>
 
-      {/* Service Inquiry Modal */}
-      <ServiceInquiryModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      {/* Start Project Modal */}
+      <StartProjectModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </section>
   )
 }

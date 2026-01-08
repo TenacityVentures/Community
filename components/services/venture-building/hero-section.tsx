@@ -3,7 +3,7 @@
 import type React from "react"
 import { useRef, useState } from "react"
 import { motion, useScroll, useTransform } from "framer-motion"
-import { ServiceInquiryModal } from "../service-inquiry-modal"
+import { StartProjectModal } from "../start-project-modal"
 
 export function VentureBuildingHero() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -86,8 +86,8 @@ export function VentureBuildingHero() {
         <div className="w-[400px] h-[400px] sm:w-[600px] sm:h-[600px] md:w-[800px] md:h-[800px] bg-[#37322F]/5 rounded-full blur-3xl" />
       </motion.div>
 
-      {/* Service Inquiry Modal */}
-      <ServiceInquiryModal
+      {/* Start Project Modal */}
+      <StartProjectModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         defaultService="Venture Building"

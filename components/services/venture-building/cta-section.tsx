@@ -3,7 +3,7 @@
 import type React from "react"
 import { useRef, useState } from "react"
 import { motion, useInView } from "framer-motion"
-import { ServiceInquiryModal } from "../service-inquiry-modal"
+import { StartProjectModal } from "../start-project-modal"
 
 export function VentureBuildingCTA() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -91,8 +91,8 @@ export function VentureBuildingCTA() {
         </motion.div>
       </div>
 
-      {/* Service Inquiry Modal */}
-      <ServiceInquiryModal
+      {/* Start Project Modal */}
+      <StartProjectModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         defaultService="Venture Building"
