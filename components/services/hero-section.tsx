@@ -1,10 +1,12 @@
 "use client"
 
 import type React from "react"
-import { useRef } from "react"
+import { useRef, useState } from "react"
 import { motion, useScroll, useTransform } from "framer-motion"
+import { ServiceInquiryModal } from "./service-inquiry-modal"
 
 export function HeroSection() {
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -55,7 +57,10 @@ export function HeroSection() {
           transition={{ duration: 0.8, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
           className="flex flex-col sm:flex-row gap-4 justify-center items-center"
         >
-          <button className="bg-[#37322F] text-white px-8 py-4 rounded-full font-medium text-base hover:bg-[#4a443f] transition-all duration-300 hover:scale-105">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="bg-[#37322F] text-white px-8 py-4 rounded-full font-medium text-base hover:bg-[#4a443f] transition-all duration-300 hover:scale-105"
+          >
             Work with us
           </button>
           <button className="border border-[#37322F] text-[#37322F] px-8 py-4 rounded-full font-medium text-base hover:bg-[#37322F] hover:text-white transition-all duration-300">
@@ -73,6 +78,9 @@ export function HeroSection() {
       >
         <div className="w-[400px] h-[400px] sm:w-[600px] sm:h-[600px] md:w-[800px] md:h-[800px] bg-[#37322F]/5 rounded-full blur-3xl" />
       </motion.div>
+
+      {/* Service Inquiry Modal */}
+      <ServiceInquiryModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </motion.section>
   )
 }

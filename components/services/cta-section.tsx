@@ -1,10 +1,12 @@
 "use client"
 
 import type React from "react"
-import { useRef } from "react"
+import { useRef, useState } from "react"
 import { motion, useInView } from "framer-motion"
+import { ServiceInquiryModal } from "./service-inquiry-modal"
 
 export function CTASection() {
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(containerRef, { once: true, margin: "-100px" })
 
@@ -42,6 +44,7 @@ export function CTASection() {
             className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4"
           >
             <motion.button
+              onClick={() => setIsModalOpen(true)}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="bg-[#37322F] text-white px-10 py-5 rounded-full font-medium text-lg hover:bg-[#4a443f] transition-all duration-300 shadow-lg"
@@ -49,6 +52,7 @@ export function CTASection() {
               Start a project
             </motion.button>
             <motion.button
+              onClick={() => setIsModalOpen(true)}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="border-2 border-[#37322F] text-[#37322F] px-10 py-5 rounded-full font-medium text-lg hover:bg-[#37322F] hover:text-white transition-all duration-300"
@@ -68,6 +72,9 @@ export function CTASection() {
           <div className="w-[500px] h-[500px] sm:w-[700px] sm:h-[700px] bg-[#37322F]/10 rounded-full blur-3xl" />
         </motion.div>
       </div>
+
+      {/* Service Inquiry Modal */}
+      <ServiceInquiryModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </section>
   )
 }

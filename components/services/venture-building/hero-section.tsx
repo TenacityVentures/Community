@@ -1,10 +1,12 @@
 "use client"
 
 import type React from "react"
-import { useRef } from "react"
+import { useRef, useState } from "react"
 import { motion, useScroll, useTransform } from "framer-motion"
+import { ServiceInquiryModal } from "../service-inquiry-modal"
 
 export function VentureBuildingHero() {
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -65,7 +67,10 @@ export function VentureBuildingHero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
         >
-          <button className="bg-[#37322F] text-white px-8 py-4 rounded-full font-medium text-base hover:bg-[#4a443f] transition-all duration-300 hover:scale-105">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="bg-[#37322F] text-white px-8 py-4 rounded-full font-medium text-base hover:bg-[#4a443f] transition-all duration-300 hover:scale-105"
+          >
             Build with us
           </button>
         </motion.div>
@@ -80,6 +85,13 @@ export function VentureBuildingHero() {
       >
         <div className="w-[400px] h-[400px] sm:w-[600px] sm:h-[600px] md:w-[800px] md:h-[800px] bg-[#37322F]/5 rounded-full blur-3xl" />
       </motion.div>
+
+      {/* Service Inquiry Modal */}
+      <ServiceInquiryModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        defaultService="Venture Building"
+      />
     </motion.section>
   )
 }
