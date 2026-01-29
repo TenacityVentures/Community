@@ -66,6 +66,7 @@ export function Header() {
           <div className="flex items-center space-x-8">
             <Link href={'/'} className="text-[#37322f] font-semibold text-lg cursor-pointer">Tenacity</Link>
             <div className="hidden md:flex items-center space-x-6">
+              <Link href={'/arena'} className="cursor-pointer"><button className="text-[#37322f] hover:text-[#37322f]/80 text-sm font-medium cursor-pointer">The Arena</button></Link>
               <Link href={'/ventures'} className="cursor-pointer"><button className="text-[#37322f] hover:text-[#37322f]/80 text-sm font-medium cursor-pointer">Ventures</button></Link>
               <Link href={'/services'} className="cursor-pointer"><button className="text-[#37322f] hover:text-[#37322f]/80 text-sm font-medium cursor-pointer">Services</button></Link>
               <Link href={'/manifesto'} className="cursor-pointer"><button className="text-[#37322f] hover:text-[#37322f]/80 text-sm font-medium cursor-pointer">Manifesto</button></Link>
