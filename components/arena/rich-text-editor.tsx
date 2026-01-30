@@ -33,6 +33,15 @@ interface RichTextEditorProps {
 }
 
 export function RichTextEditor({ content, onChange, placeholder = "Share your thoughts..." }: RichTextEditorProps) {
+  // Parse content if it's a JSON string
+  const initialContent = content ? (() => {
+    try {
+      return JSON.parse(content)
+    } catch {
+      return content
+    }
+  })() : undefined
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -59,7 +68,7 @@ export function RichTextEditor({ content, onChange, placeholder = "Share your th
         },
       }),
     ],
-    content,
+    content: initialContent,
     editorProps: {
       attributes: {
         class:
