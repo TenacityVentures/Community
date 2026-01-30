@@ -115,7 +115,7 @@ export default function NewPostPage() {
 
     if (insertError) {
       console.error("Error creating post:", insertError)
-      setError("Failed to create post. Please try again.")
+      setError(`Failed to create post: ${insertError.message}`)
       setSubmitting(false)
       return
     }
