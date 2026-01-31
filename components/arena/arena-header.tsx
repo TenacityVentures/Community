@@ -13,15 +13,9 @@ import {
   ChevronDown,
   Bookmark,
   Loader2,
+  Bell,
+  FileText,
 } from "lucide-react"
-
-const categories = [
-  { slug: "building", label: "Building", icon: "🛠️" },
-  { slug: "ideas", label: "Ideas", icon: "💡" },
-  { slug: "stories", label: "Stories", icon: "📖" },
-  { slug: "opportunities", label: "Opportunities", icon: "🤝" },
-  { slug: "challenges", label: "Challenges", icon: "🎯" },
-]
 
 export function ArenaHeader() {
   const router = useRouter()
@@ -52,42 +46,38 @@ export function ArenaHeader() {
 
   return (
     <>
-      <header className="w-full border-b border-[#37322f]/6 bg-[#f7f5f3] sticky top-0 z-40">
+      <header className="w-full border-b border-[#37322f]/6 bg-[#f7f5f3]/80 backdrop-blur-md sticky top-0 z-40">
         <div className="max-w-[1060px] mx-auto px-4">
-          <nav className="flex items-center justify-between py-4">
+          <nav className="flex items-center justify-between h-14">
             {/* Left: Logo & Navigation */}
-            <div className="flex items-center space-x-8">
+            <div className="flex items-center gap-6">
               <Link href="/" className="text-[#37322f] font-semibold text-lg">
                 Tenacity
               </Link>
-              <Link
-                href="/arena"
-                className="text-[#37322f] font-medium text-sm hover:text-[#37322f]/80 transition-colors"
-              >
-                The Arena
-              </Link>
-            </div>
-
-            {/* Center: Categories (Desktop) */}
-            <div className="hidden md:flex items-center space-x-1">
-              {categories.map((cat) => (
+              <div className="hidden sm:flex items-center gap-1">
                 <Link
-                  key={cat.slug}
-                  href={`/arena?category=${cat.slug}`}
-                  className="px-3 py-1.5 text-sm text-[#605A57] hover:text-[#37322f] hover:bg-[#37322f]/5 rounded-lg transition-all duration-200"
+                  href="/arena"
+                  className="px-3 py-1.5 text-sm font-medium text-[#37322f] hover:bg-[#37322f]/5 rounded-lg transition-colors"
                 >
-                  <span className="mr-1.5">{cat.icon}</span>
-                  {cat.label}
+                  The Arena
                 </Link>
-              ))}
+              </div>
             </div>
 
             {/* Right: Actions */}
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-2">
               {loading ? (
                 <div className="w-8 h-8 rounded-full bg-[#E0DEDB] animate-pulse" />
               ) : user ? (
                 <>
+                  {/* Notifications - placeholder for now */}
+                  <button
+                    className="p-2 text-[#605A57] hover:text-[#37322f] hover:bg-[#37322f]/5 rounded-lg transition-colors relative"
+                    title="Notifications"
+                  >
+                    <Bell className="w-5 h-5" />
+                  </button>
+
                   {/* New Post Button */}
                   <Link
                     href="/arena/new"
@@ -109,7 +99,7 @@ export function ArenaHeader() {
                   <div className="relative" ref={dropdownRef}>
                     <button
                       onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                      className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-[#37322f]/5 transition-colors"
+                      className="flex items-center gap-1.5 p-1 rounded-lg hover:bg-[#37322f]/5 transition-colors"
                     >
                       <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#37322f] to-[#5a524d] text-white flex items-center justify-center text-sm font-medium overflow-hidden ring-2 ring-white">
                         {profile?.avatar_url ? (
@@ -122,7 +112,7 @@ export function ArenaHeader() {
                           (profile?.full_name?.[0] || profile?.username?.[0] || "U").toUpperCase()
                         )}
                       </div>
-                      <ChevronDown className={`w-4 h-4 text-[#605A57] transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                      <ChevronDown className={`w-3.5 h-3.5 text-[#605A57] transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
                     </button>
 
                     <AnimatePresence>
@@ -153,6 +143,14 @@ export function ArenaHeader() {
                             >
                               <User className="w-4 h-4 text-[#9C9894]" />
                               Your Profile
+                            </Link>
+                            <Link
+                              href={`/arena/profile/${profile?.username}?tab=posts`}
+                              onClick={() => setIsDropdownOpen(false)}
+                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#37322f] hover:bg-[#f7f5f3] transition-colors"
+                            >
+                              <FileText className="w-4 h-4 text-[#9C9894]" />
+                              Your Posts
                             </Link>
                             <Link
                               href="/arena/bookmarks"
@@ -200,22 +198,6 @@ export function ArenaHeader() {
               )}
             </div>
           </nav>
-        </div>
-
-        {/* Mobile Categories */}
-        <div className="md:hidden border-t border-[#37322f]/6 overflow-x-auto">
-          <div className="flex items-center space-x-1 px-4 py-2">
-            {categories.map((cat) => (
-              <Link
-                key={cat.slug}
-                href={`/arena?category=${cat.slug}`}
-                className="flex-shrink-0 px-3 py-1.5 text-sm text-[#605A57] hover:text-[#37322f] hover:bg-[#37322f]/5 rounded-lg transition-all duration-200 whitespace-nowrap"
-              >
-                <span className="mr-1">{cat.icon}</span>
-                {cat.label}
-              </Link>
-            ))}
-          </div>
         </div>
       </header>
 
