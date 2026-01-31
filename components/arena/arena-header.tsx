@@ -103,24 +103,56 @@ export function ArenaHeader() {
 
       setLoadingNotifications(true)
 
-      const { data, error } = await (supabase
-        .from("notifications") as any)
-        .select(`
-          id,
-          type,
-          read,
-          created_at,
-          actor:profiles!notifications_actor_id_fkey(id, username, full_name, avatar_url),
-          post:posts(id, slug, title),
-          comment:comments(id, content)
-        `)
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(20)
+      try {
+        // Simplified query - fetch notifications first
+        const { data: notifData, error: notifError } = await (supabase
+          .from("notifications") as any)
+          .select("id, type, read, created_at, actor_id, post_id, comment_id")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(20)
 
-      if (!error && data) {
-        setNotifications(data)
-        setUnreadCount(data.filter((n: Notification) => !n.read).length)
+        if (notifError || !notifData) {
+          console.error("Error fetching notifications:", notifError)
+          setLoadingNotifications(false)
+          return
+        }
+
+        // Get unique actor IDs and post IDs
+        const actorIds = [...new Set(notifData.map((n: any) => n.actor_id).filter(Boolean))]
+        const postIds = [...new Set(notifData.map((n: any) => n.post_id).filter(Boolean))]
+
+        // Fetch actors and posts in parallel
+        const [actorsResult, postsResult] = await Promise.all([
+          actorIds.length > 0
+            ? (supabase.from("profiles") as any)
+                .select("id, username, full_name, avatar_url")
+                .in("id", actorIds)
+            : { data: [] },
+          postIds.length > 0
+            ? (supabase.from("posts") as any)
+                .select("id, slug, title")
+                .in("id", postIds)
+            : { data: [] },
+        ])
+
+        const actorsMap = new Map((actorsResult.data || []).map((a: any) => [a.id, a]))
+        const postsMap = new Map((postsResult.data || []).map((p: any) => [p.id, p]))
+
+        // Combine the data
+        const enrichedNotifications = notifData.map((n: any) => ({
+          id: n.id,
+          type: n.type,
+          read: n.read,
+          created_at: n.created_at,
+          actor: actorsMap.get(n.actor_id) || { id: n.actor_id, username: "unknown", full_name: null, avatar_url: null },
+          post: n.post_id ? postsMap.get(n.post_id) : undefined,
+        }))
+
+        setNotifications(enrichedNotifications)
+        setUnreadCount(enrichedNotifications.filter((n: Notification) => !n.read).length)
+      } catch (err) {
+        console.error("Error in fetchNotifications:", err)
       }
 
       setLoadingNotifications(false)
@@ -183,12 +215,12 @@ export function ArenaHeader() {
 
   return (
     <>
-      <header className="w-full border-b border-[#37322f]/6 bg-[#f7f5f3]/80 backdrop-blur-md sticky top-0 z-40">
+      <header className="w-full border-b border-[var(--arena-border)] bg-[var(--arena-bg)]/80 backdrop-blur-md sticky top-0 z-40">
         <div className="max-w-[1060px] mx-auto px-4">
           <nav className="flex items-center justify-between h-14">
             {/* Left: Logo & Navigation */}
             <div className="flex items-center gap-6">
-              <Link href="/" className="text-[#37322f] font-semibold text-lg">
+              <Link href="/" className="text-[var(--arena-text)] font-semibold text-lg">
                 Tenacity
               </Link>
               <div className="hidden sm:flex items-center gap-1">
@@ -286,8 +318,8 @@ export function ArenaHeader() {
                                       }
                                       setIsNotificationsOpen(false)
                                     }}
-                                    className={`flex items-start gap-3 px-4 py-3 hover:bg-[#f7f5f3] transition-colors ${
-                                      !notification.read ? "bg-blue-50/50" : ""
+                                    className={`flex items-start gap-3 px-4 py-3 hover:bg-[#E0DEDB]/50 transition-colors ${
+                                      !notification.read ? "bg-blue-50/80" : ""
                                     }`}
                                   >
                                     {/* Actor Avatar */}

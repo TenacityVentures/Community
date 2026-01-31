@@ -150,26 +150,46 @@ export function ArenaContent() {
         transition={{ duration: 0.5 }}
         className="text-center mb-10"
       >
-        <h1 className="font-instrument-serif text-4xl sm:text-5xl text-[#37322f] mb-3">
+        <h1 className="font-instrument-serif text-4xl sm:text-5xl text-[var(--arena-text)] mb-3">
           The Arena
         </h1>
-        <p className="text-[#605A57] max-w-xl mx-auto">
+        <p className="text-[var(--arena-text-muted)] max-w-xl mx-auto">
           Where builders share ideas, discuss ventures, and forge connections.
           Step in, speak up, and grow together.
         </p>
       </motion.div>
 
-      {/* Category Filter (Desktop Sidebar Style) */}
+      {/* Mobile Categories - Horizontal Scroll */}
+      <div className="lg:hidden mb-6 -mx-4 px-4">
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+          {categories.map((cat) => (
+            <Link
+              key={cat.slug}
+              href={cat.slug === "all" ? "/arena" : `/arena?category=${cat.slug}`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm whitespace-nowrap transition-all duration-200 flex-shrink-0 ${
+                activeCategory === cat.slug
+                  ? "bg-[var(--arena-text)] text-[var(--arena-bg)]"
+                  : "bg-[var(--arena-card)] border border-[var(--arena-border)] text-[var(--arena-text-muted)] hover:border-[var(--arena-text)]/30"
+              }`}
+            >
+              <span>{cat.icon}</span>
+              {cat.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Desktop Layout with Sidebar */}
       <div className="flex flex-col lg:flex-row gap-8">
-        {/* Sidebar */}
+        {/* Sidebar - Desktop Only */}
         <motion.aside
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="lg:w-56 flex-shrink-0"
+          className="hidden lg:block lg:w-56 flex-shrink-0"
         >
           <div className="lg:sticky lg:top-24">
-            <h3 className="text-xs font-semibold text-[#605A57] uppercase tracking-wider mb-3 px-3">
+            <h3 className="text-xs font-semibold text-[var(--arena-text-muted)] uppercase tracking-wider mb-3 px-3">
               Categories
             </h3>
             <nav className="space-y-1">
@@ -179,8 +199,8 @@ export function ArenaContent() {
                   href={cat.slug === "all" ? "/arena" : `/arena?category=${cat.slug}`}
                   className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
                     activeCategory === cat.slug
-                      ? "bg-[#37322f] text-white"
-                      : "text-[#605A57] hover:bg-[#37322f]/5 hover:text-[#37322f]"
+                      ? "bg-[var(--arena-text)] text-[var(--arena-bg)]"
+                      : "text-[var(--arena-text-muted)] hover:bg-[var(--arena-text)]/5 hover:text-[var(--arena-text)]"
                   }`}
                 >
                   <span>{cat.icon}</span>
@@ -190,11 +210,11 @@ export function ArenaContent() {
             </nav>
 
             {/* Decorative Element */}
-            <div className="hidden lg:block mt-8 p-4 bg-white rounded-xl border border-[#E0DEDB]">
-              <p className="font-instrument-serif text-lg text-[#37322f] mb-2">
+            <div className="mt-8 p-4 bg-[var(--arena-card)] rounded-xl border border-[var(--arena-border)]">
+              <p className="font-instrument-serif text-lg text-[var(--arena-text)] mb-2">
                 Think. Build. Do. Grow.
               </p>
-              <p className="text-xs text-[#605A57]">
+              <p className="text-xs text-[var(--arena-text-muted)]">
                 Share your journey with fellow builders and doers.
               </p>
             </div>
@@ -238,8 +258,8 @@ export function ArenaContent() {
                   {infiniteScroll ? (
                     // Infinite scroll loading indicator
                     <div className="py-4">
-                      <Loader2 className="w-5 h-5 animate-spin text-[#9C9894] mx-auto" />
-                      <p className="mt-2 text-sm text-[#605A57]">
+                      <Loader2 className="w-5 h-5 animate-spin text-[var(--arena-text-faint)] mx-auto" />
+                      <p className="mt-2 text-sm text-[var(--arena-text-muted)]">
                         Loading more posts...
                       </p>
                     </div>
@@ -249,7 +269,7 @@ export function ArenaContent() {
                       <button
                         onClick={loadMore}
                         disabled={loadingMore}
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-white border-2 border-[#E0DEDB] rounded-xl text-[#37322f] font-medium hover:border-[#37322f] hover:bg-[#f7f5f3] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--arena-card)] border-2 border-[var(--arena-border)] rounded-xl text-[var(--arena-text)] font-medium hover:border-[var(--arena-text)] hover:bg-[var(--arena-bg)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {loadingMore ? (
                           <>
@@ -265,7 +285,7 @@ export function ArenaContent() {
                       </button>
                     </>
                   )}
-                  <p className="mt-3 text-sm text-[#605A57]">
+                  <p className="mt-3 text-sm text-[var(--arena-text-muted)]">
                     Showing {posts.length} of {totalCount} posts
                   </p>
                 </div>
@@ -274,7 +294,7 @@ export function ArenaContent() {
               {/* All loaded indicator */}
               {!hasMore && posts.length > 0 && totalCount > POSTS_PER_PAGE && (
                 <div className="mt-8 text-center">
-                  <p className="text-sm text-[#605A57]">
+                  <p className="text-sm text-[var(--arena-text-muted)]">
                     You've reached the end! {totalCount} posts total.
                   </p>
                 </div>
@@ -285,7 +305,7 @@ export function ArenaContent() {
                 <div className="mt-6 flex justify-center">
                   <button
                     onClick={toggleInfiniteScroll}
-                    className="inline-flex items-center gap-2 px-3 py-1.5 text-xs text-[#9C9894] hover:text-[#605A57] transition-colors"
+                    className="inline-flex items-center gap-2 px-3 py-1.5 text-xs text-[var(--arena-text-faint)] hover:text-[var(--arena-text-muted)] transition-colors"
                   >
                     {infiniteScroll ? (
                       <>

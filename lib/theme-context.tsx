@@ -12,50 +12,68 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('system')
-  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light')
+// Get initial theme without hydration mismatch
+function getInitialTheme(): Theme {
+  if (typeof window === 'undefined') return 'light'
+  const saved = localStorage.getItem('arena-theme') as Theme | null
+  return saved || 'light'
+}
 
+function getSystemTheme(): 'light' | 'dark' {
+  if (typeof window === 'undefined') return 'light'
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+}
+
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [theme, setThemeState] = useState<Theme>('light')
+  const [mounted, setMounted] = useState(false)
+
+  // Compute resolved theme
+  const resolvedTheme = theme === 'system' ? getSystemTheme() : theme
+
+  // Load saved theme after mount
   useEffect(() => {
-    // Get saved theme from localStorage
-    const savedTheme = localStorage.getItem('theme') as Theme | null
-    if (savedTheme) {
-      setTheme(savedTheme)
+    setMounted(true)
+    const saved = localStorage.getItem('arena-theme') as Theme | null
+    if (saved) {
+      setThemeState(saved)
     }
   }, [])
 
+  // Apply theme to document
   useEffect(() => {
+    if (!mounted) return
+
     const root = document.documentElement
 
-    const applyTheme = (isDark: boolean) => {
-      if (isDark) {
-        root.classList.add('dark')
-        setResolvedTheme('dark')
-      } else {
-        root.classList.remove('dark')
-        setResolvedTheme('light')
-      }
-    }
-
-    if (theme === 'system') {
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-      applyTheme(mediaQuery.matches)
-
-      const handler = (e: MediaQueryListEvent) => applyTheme(e.matches)
-      mediaQuery.addEventListener('change', handler)
-      return () => mediaQuery.removeEventListener('change', handler)
+    if (resolvedTheme === 'dark') {
+      root.classList.add('dark')
     } else {
-      applyTheme(theme === 'dark')
+      root.classList.remove('dark')
     }
+  }, [resolvedTheme, mounted])
+
+  // Listen for system theme changes
+  useEffect(() => {
+    if (theme !== 'system') return
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    const handler = () => {
+      // Force re-render to update resolvedTheme
+      setThemeState('system')
+    }
+
+    mediaQuery.addEventListener('change', handler)
+    return () => mediaQuery.removeEventListener('change', handler)
   }, [theme])
 
-  const handleSetTheme = (newTheme: Theme) => {
-    setTheme(newTheme)
-    localStorage.setItem('theme', newTheme)
+  const setTheme = (newTheme: Theme) => {
+    setThemeState(newTheme)
+    localStorage.setItem('arena-theme', newTheme)
   }
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme: handleSetTheme, resolvedTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme, resolvedTheme }}>
       {children}
     </ThemeContext.Provider>
   )
