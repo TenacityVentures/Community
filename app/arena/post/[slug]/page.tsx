@@ -38,6 +38,7 @@ import {
   Link as LinkIcon,
 } from "lucide-react"
 import type { PostWithAuthor, CommentWithAuthor, PostCategory, ReactionType, Reaction, CommentWithReplies } from "@/lib/supabase/types"
+import { MentionInput, extractMentions, renderContentWithMentions } from "@/components/arena/mention-input"
 
 const COMMENTS_PER_PAGE = 5
 
@@ -189,9 +190,9 @@ function CommentItem({
         {/* Comment content */}
         {isEditing ? (
           <div className="ml-8 space-y-2">
-            <textarea
+            <MentionInput
               value={editContent}
-              onChange={(e) => setEditContent(e.target.value)}
+              onChange={setEditContent}
               className="w-full bg-[#f7f5f3] border-0 rounded-lg px-3 py-2 text-sm text-[#37322f] focus:outline-none focus:ring-2 focus:ring-[#37322f]/20 resize-none transition-all"
               rows={2}
               autoFocus
@@ -215,7 +216,7 @@ function CommentItem({
           </div>
         ) : (
           <p className="ml-8 text-[#37322f] text-sm leading-relaxed whitespace-pre-wrap break-words">
-            {comment.content}
+            {renderContentWithMentions(comment.content)}
           </p>
         )}
 
@@ -275,10 +276,10 @@ function CommentItem({
               <div className="flex gap-2 items-start">
                 <CornerDownRight className="w-4 h-4 text-[#9C9894] mt-2 flex-shrink-0" />
                 <div className="flex-1">
-                  <textarea
+                  <MentionInput
                     value={replyContent}
-                    onChange={(e) => setReplyContent(e.target.value)}
-                    placeholder={`Reply to ${comment.author.full_name || comment.author.username}...`}
+                    onChange={setReplyContent}
+                    placeholder={`Reply to ${comment.author.full_name || comment.author.username}... Use @ to mention users`}
                     className="w-full bg-[#f7f5f3] border-0 rounded-lg px-3 py-2 text-sm text-[#37322f] focus:outline-none focus:ring-2 focus:ring-[#37322f]/20 resize-none placeholder:text-[#9C9894] transition-all"
                     rows={2}
                     autoFocus
@@ -563,6 +564,7 @@ export default function PostPage() {
       setReactions(reactions.filter(r => r.user_id !== user.id))
       await (supabase.from("reactions") as any).delete().eq("user_id", user.id).eq("post_id", post.id)
     } else {
+      const isNewReaction = !userReaction
       setUserReaction(type)
       if (userReaction) {
         setReactions(reactions.map(r => r.user_id === user.id ? { ...r, type } : r))
@@ -571,6 +573,16 @@ export default function PostPage() {
         const newReaction = { user_id: user.id, post_id: post.id, type }
         setReactions([...reactions, newReaction as Reaction])
         await (supabase.from("reactions") as any).insert(newReaction)
+      }
+
+      // Create notification for post author (only for new reactions, not type changes)
+      if (isNewReaction && post.author_id !== user.id) {
+        await (supabase.from("notifications") as any).insert({
+          user_id: post.author_id,
+          actor_id: user.id,
+          type: "reaction",
+          post_id: post.id,
+        })
       }
     }
   }
@@ -606,6 +618,42 @@ export default function PostPage() {
       setNewComment("")
       setTotalComments(prev => prev + 1)
       setRootCommentCount(prev => prev + 1)
+
+      // Create notification for post author (if not commenting on own post)
+      if (post.author_id !== user.id) {
+        await (supabase.from("notifications") as any).insert({
+          user_id: post.author_id,
+          actor_id: user.id,
+          type: "comment",
+          post_id: post.id,
+          comment_id: data.id,
+        })
+      }
+
+      // Create notifications for mentioned users
+      const mentions = extractMentions(newComment.trim())
+      if (mentions.length > 0) {
+        // Fetch mentioned users' IDs
+        const { data: mentionedUsers } = await (supabase.from("profiles") as any)
+          .select("id, username")
+          .in("username", mentions)
+
+        if (mentionedUsers) {
+          const notifications = mentionedUsers
+            .filter((u: any) => u.id !== user.id && u.id !== post.author_id) // Don't notify self or post author (already notified)
+            .map((u: any) => ({
+              user_id: u.id,
+              actor_id: user.id,
+              type: "mention",
+              post_id: post.id,
+              comment_id: data.id,
+            }))
+
+          if (notifications.length > 0) {
+            await (supabase.from("notifications") as any).insert(notifications)
+          }
+        }
+      }
     }
     setSubmittingComment(false)
   }
@@ -620,6 +668,45 @@ export default function PostPage() {
     if (!error && data) {
       setComments(prev => [...prev, data as CommentWithAuthor])
       setTotalComments(prev => prev + 1)
+
+      // Find the parent comment to notify its author
+      const parentComment = comments.find(c => c.id === parentId)
+      if (parentComment && parentComment.author_id !== user.id) {
+        await (supabase.from("notifications") as any).insert({
+          user_id: parentComment.author_id,
+          actor_id: user.id,
+          type: "reply",
+          post_id: post.id,
+          comment_id: data.id,
+        })
+      }
+
+      // Create notifications for mentioned users
+      const mentions = extractMentions(content)
+      if (mentions.length > 0) {
+        const { data: mentionedUsers } = await (supabase.from("profiles") as any)
+          .select("id, username")
+          .in("username", mentions)
+
+        if (mentionedUsers) {
+          const alreadyNotified = [user.id]
+          if (parentComment) alreadyNotified.push(parentComment.author_id)
+
+          const notifications = mentionedUsers
+            .filter((u: any) => !alreadyNotified.includes(u.id))
+            .map((u: any) => ({
+              user_id: u.id,
+              actor_id: user.id,
+              type: "mention",
+              post_id: post.id,
+              comment_id: data.id,
+            }))
+
+          if (notifications.length > 0) {
+            await (supabase.from("notifications") as any).insert(notifications)
+          }
+        }
+      }
     }
   }
 
@@ -908,10 +995,10 @@ export default function PostPage() {
                     )}
                   </div>
                   <div className="flex-1">
-                    <textarea
+                    <MentionInput
                       value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      placeholder="Share your thoughts..."
+                      onChange={setNewComment}
+                      placeholder="Share your thoughts... Use @ to mention users"
                       rows={3}
                       className="w-full bg-white border border-[#E0DEDB]/60 rounded-xl px-4 py-3 text-sm text-[#37322f] focus:outline-none focus:border-[#37322f]/30 transition-colors resize-none placeholder:text-[#9C9894]"
                     />

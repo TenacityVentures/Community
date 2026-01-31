@@ -1,15 +1,16 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback, useRef } from "react"
 import { useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { PostCard, PostCardSkeleton, EmptyPostState } from "@/components/arena/post-card"
 import { motion } from "framer-motion"
-import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
+import { ChevronRight, Loader2, Zap, Hand } from "lucide-react"
 import type { PostWithAuthor } from "@/lib/supabase/types"
 import Link from "next/link"
 
 const POSTS_PER_PAGE = 10
+const INFINITE_SCROLL_KEY = "arena_infinite_scroll"
 
 const categories = [
   { slug: "all", label: "All Posts", icon: "✨" },
@@ -32,15 +33,32 @@ export function ArenaContent() {
   const [currentPage, setCurrentPage] = useState(pageParam ? parseInt(pageParam) : 1)
   const [totalCount, setTotalCount] = useState(0)
   const [hasMore, setHasMore] = useState(false)
+  const [infiniteScroll, setInfiniteScroll] = useState(false)
 
   const supabase = createClient()
+  const loadMoreRef = useRef<HTMLDivElement>(null)
+  const isLoadingRef = useRef(false)
+
+  // Load infinite scroll preference from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem(INFINITE_SCROLL_KEY)
+    if (saved !== null) {
+      setInfiniteScroll(saved === "true")
+    }
+  }, [])
+
+  const toggleInfiniteScroll = () => {
+    const newValue = !infiniteScroll
+    setInfiniteScroll(newValue)
+    localStorage.setItem(INFINITE_SCROLL_KEY, String(newValue))
+  }
 
   useEffect(() => {
     setActiveCategory(categoryParam || "all")
     setCurrentPage(1)
   }, [categoryParam])
 
-  const fetchPosts = useCallback(async (page: number, append = false) => {
+  const fetchPosts = useCallback(async (page: number, append = false): Promise<void> => {
     if (append) {
       setLoadingMore(true)
     } else {
@@ -86,11 +104,40 @@ export function ArenaContent() {
     fetchPosts(1)
   }, [activeCategory, fetchPosts])
 
-  const loadMore = () => {
+  const loadMore = useCallback(() => {
+    if (isLoadingRef.current || !hasMore) return
+    isLoadingRef.current = true
     const nextPage = currentPage + 1
     setCurrentPage(nextPage)
-    fetchPosts(nextPage, true)
-  }
+    fetchPosts(nextPage, true).finally(() => {
+      isLoadingRef.current = false
+    })
+  }, [currentPage, hasMore, fetchPosts])
+
+  // Infinite scroll observer
+  useEffect(() => {
+    if (!infiniteScroll || !hasMore || loading) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !loadingMore) {
+          loadMore()
+        }
+      },
+      { threshold: 0.1, rootMargin: "100px" }
+    )
+
+    const currentRef = loadMoreRef.current
+    if (currentRef) {
+      observer.observe(currentRef)
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef)
+      }
+    }
+  }, [infiniteScroll, hasMore, loading, loadingMore, loadMore])
 
   const totalPages = Math.ceil(totalCount / POSTS_PER_PAGE)
 
@@ -187,24 +234,37 @@ export function ArenaContent() {
 
               {/* Load More / Pagination */}
               {hasMore && (
-                <div className="mt-8 text-center">
-                  <button
-                    onClick={loadMore}
-                    disabled={loadingMore}
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-white border-2 border-[#E0DEDB] rounded-xl text-[#37322f] font-medium hover:border-[#37322f] hover:bg-[#f7f5f3] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {loadingMore ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Loading...
-                      </>
-                    ) : (
-                      <>
-                        Load More Posts
-                        <ChevronRight className="w-4 h-4" />
-                      </>
-                    )}
-                  </button>
+                <div ref={loadMoreRef} className="mt-8 text-center">
+                  {infiniteScroll ? (
+                    // Infinite scroll loading indicator
+                    <div className="py-4">
+                      <Loader2 className="w-5 h-5 animate-spin text-[#9C9894] mx-auto" />
+                      <p className="mt-2 text-sm text-[#605A57]">
+                        Loading more posts...
+                      </p>
+                    </div>
+                  ) : (
+                    // Manual load more button
+                    <>
+                      <button
+                        onClick={loadMore}
+                        disabled={loadingMore}
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-white border-2 border-[#E0DEDB] rounded-xl text-[#37322f] font-medium hover:border-[#37322f] hover:bg-[#f7f5f3] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {loadingMore ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Loading...
+                          </>
+                        ) : (
+                          <>
+                            Load More Posts
+                            <ChevronRight className="w-4 h-4" />
+                          </>
+                        )}
+                      </button>
+                    </>
+                  )}
                   <p className="mt-3 text-sm text-[#605A57]">
                     Showing {posts.length} of {totalCount} posts
                   </p>
@@ -217,6 +277,28 @@ export function ArenaContent() {
                   <p className="text-sm text-[#605A57]">
                     You've reached the end! {totalCount} posts total.
                   </p>
+                </div>
+              )}
+
+              {/* Infinite Scroll Toggle */}
+              {totalCount > POSTS_PER_PAGE && (
+                <div className="mt-6 flex justify-center">
+                  <button
+                    onClick={toggleInfiniteScroll}
+                    className="inline-flex items-center gap-2 px-3 py-1.5 text-xs text-[#9C9894] hover:text-[#605A57] transition-colors"
+                  >
+                    {infiniteScroll ? (
+                      <>
+                        <Hand className="w-3.5 h-3.5" />
+                        Switch to manual loading
+                      </>
+                    ) : (
+                      <>
+                        <Zap className="w-3.5 h-3.5" />
+                        Enable infinite scroll
+                      </>
+                    )}
+                  </button>
                 </div>
               )}
             </>

@@ -16,6 +16,9 @@ import {
   MapPin,
   Settings,
   Users,
+  UserPlus,
+  UserMinus,
+  Loader2,
 } from "lucide-react"
 import type { Profile, PostWithAuthor } from "@/lib/supabase/types"
 
@@ -35,6 +38,12 @@ export default function ProfilePage() {
   const [posts, setPosts] = useState<PostWithAuthor[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<"posts" | "about">("posts")
+
+  // Follow feature state
+  const [isFollowing, setIsFollowing] = useState(false)
+  const [followerCount, setFollowerCount] = useState(0)
+  const [followingCount, setFollowingCount] = useState(0)
+  const [followLoading, setFollowLoading] = useState(false)
 
   const isOwnProfile = currentUserProfile?.username === username
 
@@ -67,11 +76,82 @@ export default function ProfilePage() {
         .order("created_at", { ascending: false })
 
       setPosts((postsData as PostWithAuthor[]) || [])
+
+      // Fetch follower and following counts
+      const [followerResult, followingResult] = await Promise.all([
+        (supabase.from("follows") as any)
+          .select("*", { count: "exact", head: true })
+          .eq("following_id", profileData.id),
+        (supabase.from("follows") as any)
+          .select("*", { count: "exact", head: true })
+          .eq("follower_id", profileData.id),
+      ])
+
+      setFollowerCount(followerResult.count || 0)
+      setFollowingCount(followingResult.count || 0)
+
       setLoading(false)
     }
 
     fetchProfile()
   }, [username])
+
+  // Check if current user is following this profile
+  useEffect(() => {
+    async function checkFollowStatus() {
+      if (!user || !profile || isOwnProfile) return
+
+      const { data } = await (supabase
+        .from("follows") as any)
+        .select("id")
+        .eq("follower_id", user.id)
+        .eq("following_id", profile.id)
+        .single()
+
+      setIsFollowing(!!data)
+    }
+
+    checkFollowStatus()
+  }, [user, profile, isOwnProfile])
+
+  const handleFollow = async () => {
+    if (!user || !profile || followLoading) return
+
+    setFollowLoading(true)
+
+    try {
+      if (isFollowing) {
+        // Unfollow
+        await (supabase.from("follows") as any)
+          .delete()
+          .eq("follower_id", user.id)
+          .eq("following_id", profile.id)
+
+        setIsFollowing(false)
+        setFollowerCount((prev) => Math.max(0, prev - 1))
+      } else {
+        // Follow
+        await (supabase.from("follows") as any).insert({
+          follower_id: user.id,
+          following_id: profile.id,
+        })
+
+        setIsFollowing(true)
+        setFollowerCount((prev) => prev + 1)
+
+        // Create notification for the followed user
+        await (supabase.from("notifications") as any).insert({
+          user_id: profile.id,
+          actor_id: user.id,
+          type: "follow",
+        })
+      }
+    } catch (error) {
+      console.error("Error toggling follow:", error)
+    } finally {
+      setFollowLoading(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -205,29 +285,71 @@ export default function ProfilePage() {
               </div>
 
               {/* Actions */}
-              {isOwnProfile && (
-                <Link
-                  href="/arena/settings"
-                  className="flex items-center gap-2 px-4 py-2 border border-[#E0DEDB] rounded-lg text-sm text-[#605A57] hover:border-[#37322f] hover:text-[#37322f] transition-colors self-center sm:self-start"
-                >
-                  <Settings className="w-4 h-4" />
-                  Edit Profile
-                </Link>
-              )}
+              <div className="flex gap-2 self-center sm:self-start">
+                {isOwnProfile ? (
+                  <Link
+                    href="/arena/settings"
+                    className="flex items-center gap-2 px-4 py-2 border border-[#E0DEDB] rounded-lg text-sm text-[#605A57] hover:border-[#37322f] hover:text-[#37322f] transition-colors"
+                  >
+                    <Settings className="w-4 h-4" />
+                    Edit Profile
+                  </Link>
+                ) : user ? (
+                  <button
+                    onClick={handleFollow}
+                    disabled={followLoading}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
+                      isFollowing
+                        ? "border border-[#E0DEDB] text-[#605A57] hover:border-red-300 hover:text-red-600 hover:bg-red-50"
+                        : "bg-[#37322F] text-white hover:bg-[#4a443f]"
+                    }`}
+                  >
+                    {followLoading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : isFollowing ? (
+                      <>
+                        <UserMinus className="w-4 h-4" />
+                        <span className="hidden sm:inline">Unfollow</span>
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus className="w-4 h-4" />
+                        <span className="hidden sm:inline">Follow</span>
+                      </>
+                    )}
+                  </button>
+                ) : (
+                  <Link
+                    href="/arena/login"
+                    className="flex items-center gap-2 px-4 py-2 bg-[#37322F] text-white rounded-lg text-sm font-medium hover:bg-[#4a443f] transition-colors"
+                  >
+                    <UserPlus className="w-4 h-4" />
+                    <span className="hidden sm:inline">Follow</span>
+                  </Link>
+                )}
+              </div>
             </div>
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="grid grid-cols-4 gap-3 mb-6">
             <div className="bg-white rounded-xl border border-[#E0DEDB] p-4 text-center">
               <p className="text-2xl font-semibold text-[#37322f]">{posts.length}</p>
               <p className="text-sm text-[#605A57]">Posts</p>
             </div>
             <div className="bg-white rounded-xl border border-[#E0DEDB] p-4 text-center">
+              <p className="text-2xl font-semibold text-[#37322f]">{followerCount}</p>
+              <p className="text-sm text-[#605A57]">Followers</p>
+            </div>
+            <div className="bg-white rounded-xl border border-[#E0DEDB] p-4 text-center">
+              <p className="text-2xl font-semibold text-[#37322f]">{followingCount}</p>
+              <p className="text-sm text-[#605A57]">Following</p>
+            </div>
+            <div className="bg-white rounded-xl border border-[#E0DEDB] p-4 text-center">
               <p className="text-2xl font-semibold text-[#37322f]">
                 {posts.reduce((acc, post) => acc + post.view_count, 0)}
               </p>
-              <p className="text-sm text-[#605A57]">Total Views</p>
+              <p className="text-sm text-[#605A57]">Views</p>
             </div>
           </div>
 
