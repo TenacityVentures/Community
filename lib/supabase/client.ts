@@ -8,10 +8,28 @@ export function createClient() {
     return client
   }
 
-  client = createBrowserClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Missing Supabase environment variables')
+  }
+
+  client = createBrowserClient<Database>(supabaseUrl, supabaseKey, {
+    auth: {
+      // Persist session in cookies
+      persistSession: true,
+      // Auto refresh session
+      autoRefreshToken: true,
+      // Detect session from URL (for OAuth callbacks)
+      detectSessionInUrl: true,
+    },
+  })
 
   return client
+}
+
+// Reset client (useful for testing or when session changes)
+export function resetClient() {
+  client = null
 }

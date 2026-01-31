@@ -22,15 +22,33 @@ export async function updateSession(request: NextRequest) {
             request,
           })
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+            supabaseResponse.cookies.set(name, value, {
+              ...options,
+              // Ensure cookies are accessible
+              sameSite: 'lax',
+              secure: process.env.NODE_ENV === 'production',
+            })
           )
         },
       },
     }
   )
 
-  // Refresh the session if it exists
-  await supabase.auth.getUser()
+  // IMPORTANT: Do not use getSession() - it reads from storage without verification
+  // getUser() will refresh the session if needed
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  // Optional: Protect routes that require authentication
+  const isProtectedRoute = request.nextUrl.pathname.startsWith('/arena/new') ||
+                           request.nextUrl.pathname.startsWith('/arena/edit') ||
+                           request.nextUrl.pathname.startsWith('/arena/settings') ||
+                           request.nextUrl.pathname.startsWith('/arena/bookmarks')
+
+  if (isProtectedRoute && (error || !user)) {
+    const loginUrl = new URL('/arena/login', request.url)
+    loginUrl.searchParams.set('next', request.nextUrl.pathname)
+    return NextResponse.redirect(loginUrl)
+  }
 
   return supabaseResponse
 }
