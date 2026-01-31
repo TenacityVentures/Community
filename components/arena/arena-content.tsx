@@ -143,22 +143,6 @@ export function ArenaContent() {
 
   return (
     <>
-      {/* Hero Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="text-center mb-10"
-      >
-        <h1 className="font-instrument-serif text-4xl sm:text-5xl text-[var(--arena-text)] mb-3">
-          The Arena
-        </h1>
-        <p className="text-[var(--arena-text-muted)] max-w-xl mx-auto">
-          Where builders share ideas, discuss ventures, and forge connections.
-          Step in, speak up, and grow together.
-        </p>
-      </motion.div>
-
       {/* Mobile Categories - Horizontal Scroll */}
       <div className="lg:hidden mb-6 -mx-4 px-4">
         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
@@ -228,6 +212,16 @@ export function ArenaContent() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="flex-1 min-w-0"
         >
+          {/* Hero Section - Centered above posts */}
+          <div className="text-center mb-10">
+            <h1 className="font-instrument-serif text-4xl sm:text-5xl text-[var(--arena-text)] mb-3">
+              The Arena
+            </h1>
+            <p className="text-[var(--arena-text-muted)] max-w-xl mx-auto">
+              Where builders share ideas, discuss ventures, and forge connections.
+              Step in, speak up, and grow together.
+            </p>
+          </div>
           {/* Posts Grid */}
           {loading ? (
             <div className="space-y-4">

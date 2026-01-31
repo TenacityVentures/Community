@@ -68,7 +68,7 @@ const notificationMessages = {
 export function ArenaHeader() {
   const router = useRouter()
   const { user, profile, loading, signOut } = useAuth()
-  const { theme, setTheme, resolvedTheme } = useTheme()
+  const { setTheme, resolvedTheme } = useTheme()
   const supabase = createClient()
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
@@ -78,6 +78,7 @@ export function ArenaHeader() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [loadingNotifications, setLoadingNotifications] = useState(false)
+  const [markingAllRead, setMarkingAllRead] = useState(false)
 
   const dropdownRef = useRef<HTMLDivElement>(null)
   const notificationsRef = useRef<HTMLDivElement>(null)
@@ -104,7 +105,6 @@ export function ArenaHeader() {
       setLoadingNotifications(true)
 
       try {
-        // Simplified query - fetch notifications first
         const { data: notifData, error: notifError } = await (supabase
           .from("notifications") as any)
           .select("id, type, read, created_at, actor_id, post_id, comment_id")
@@ -118,11 +118,9 @@ export function ArenaHeader() {
           return
         }
 
-        // Get unique actor IDs and post IDs
         const actorIds = [...new Set(notifData.map((n: any) => n.actor_id).filter(Boolean))]
         const postIds = [...new Set(notifData.map((n: any) => n.post_id).filter(Boolean))]
 
-        // Fetch actors and posts in parallel
         const [actorsResult, postsResult] = await Promise.all([
           actorIds.length > 0
             ? (supabase.from("profiles") as any)
@@ -139,7 +137,6 @@ export function ArenaHeader() {
         const actorsMap = new Map((actorsResult.data || []).map((a: any) => [a.id, a]))
         const postsMap = new Map((postsResult.data || []).map((p: any) => [p.id, p]))
 
-        // Combine the data
         const enrichedNotifications = notifData.map((n: any) => ({
           id: n.id,
           type: n.type,
@@ -160,7 +157,6 @@ export function ArenaHeader() {
 
     fetchNotifications()
 
-    // Subscribe to new notifications
     const channel = supabase
       .channel("notifications")
       .on(
@@ -194,15 +190,25 @@ export function ArenaHeader() {
   }
 
   const markAllAsRead = async () => {
-    if (!user) return
+    if (!user || markingAllRead) return
 
-    await (supabase.from("notifications") as any)
-      .update({ read: true })
-      .eq("user_id", user.id)
-      .eq("read", false)
+    setMarkingAllRead(true)
 
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
-    setUnreadCount(0)
+    try {
+      const { error } = await (supabase.from("notifications") as any)
+        .update({ read: true })
+        .eq("user_id", user.id)
+        .eq("read", false)
+
+      if (!error) {
+        setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
+        setUnreadCount(0)
+      }
+    } catch (err) {
+      console.error("Error marking all as read:", err)
+    }
+
+    setMarkingAllRead(false)
   }
 
   const handleSignOut = async () => {
@@ -218,41 +224,43 @@ export function ArenaHeader() {
       <header className="w-full border-b border-[var(--arena-border)] bg-[var(--arena-bg)]/80 backdrop-blur-md sticky top-0 z-40">
         <div className="max-w-[1060px] mx-auto px-4">
           <nav className="flex items-center justify-between h-14">
-            {/* Left: Logo & Navigation */}
-            <div className="flex items-center gap-6">
+            {/* Left: Logo */}
+            <div className="flex items-center">
               <Link href="/" className="text-[var(--arena-text)] font-semibold text-lg">
                 Tenacity
               </Link>
-              <div className="hidden sm:flex items-center gap-1">
-                <Link
-                  href="/arena"
-                  className="px-3 py-1.5 text-sm font-medium text-[#37322f] hover:bg-[#37322f]/5 rounded-lg transition-colors"
-                >
-                  The Arena
-                </Link>
-              </div>
+            </div>
+
+            {/* Center: The Arena */}
+            <div className="absolute left-1/2 -translate-x-1/2">
+              <Link
+                href="/arena"
+                className="px-4 py-1.5 text-sm font-medium text-[var(--arena-text)] hover:bg-[var(--arena-text)]/5 rounded-lg transition-colors"
+              >
+                The Arena
+              </Link>
             </div>
 
             {/* Right: Actions */}
             <div className="flex items-center gap-2">
+              {/* Theme Toggle - Always visible */}
+              <button
+                onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+                className="p-2 text-[var(--arena-text-muted)] hover:text-[var(--arena-text)] hover:bg-[var(--arena-text)]/5 rounded-lg transition-colors"
+                title={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                {resolvedTheme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
+
               {loading ? (
-                <div className="w-8 h-8 rounded-full bg-[#E0DEDB] animate-pulse" />
+                <div className="w-8 h-8 rounded-full bg-[var(--arena-border)] animate-pulse" />
               ) : user ? (
                 <>
-                  {/* Theme Toggle */}
-                  <button
-                    onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-                    className="p-2 text-[#605A57] hover:text-[#37322f] hover:bg-[#37322f]/5 dark:text-[#a8a5a0] dark:hover:text-[#f5f3f1] dark:hover:bg-white/5 rounded-lg transition-colors"
-                    title={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-                  >
-                    {resolvedTheme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                  </button>
-
                   {/* Notifications Dropdown */}
                   <div className="relative" ref={notificationsRef}>
                     <button
                       onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                      className="p-2 text-[#605A57] hover:text-[#37322f] hover:bg-[#37322f]/5 dark:text-[#a8a5a0] dark:hover:text-[#f5f3f1] dark:hover:bg-white/5 rounded-lg transition-colors relative"
+                      className="p-2 text-[var(--arena-text-muted)] hover:text-[var(--arena-text)] hover:bg-[var(--arena-text)]/5 rounded-lg transition-colors relative"
                       title="Notifications"
                     >
                       <Bell className="w-5 h-5" />
@@ -270,17 +278,26 @@ export function ArenaHeader() {
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: 8, scale: 0.96 }}
                           transition={{ duration: 0.15 }}
-                          className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-[#E0DEDB]/60 overflow-hidden"
+                          className="absolute right-0 mt-2 w-80 bg-[var(--arena-card)] rounded-xl shadow-lg border border-[var(--arena-border)] overflow-hidden"
                         >
                           {/* Header */}
-                          <div className="px-4 py-3 border-b border-[#E0DEDB]/60 flex items-center justify-between">
-                            <h3 className="font-medium text-[#37322f] text-sm">Notifications</h3>
+                          <div className="px-4 py-3 border-b border-[var(--arena-border)] flex items-center justify-between">
+                            <h3 className="font-medium text-[var(--arena-text)] text-sm">Notifications</h3>
                             {unreadCount > 0 && (
                               <button
-                                onClick={markAllAsRead}
-                                className="text-xs text-[#605A57] hover:text-[#37322f] flex items-center gap-1"
+                                onClick={(e) => {
+                                  e.preventDefault()
+                                  e.stopPropagation()
+                                  markAllAsRead()
+                                }}
+                                disabled={markingAllRead}
+                                className="text-xs text-[var(--arena-text-muted)] hover:text-[var(--arena-text)] flex items-center gap-1 disabled:opacity-50"
                               >
-                                <Check className="w-3 h-3" />
+                                {markingAllRead ? (
+                                  <Loader2 className="w-3 h-3 animate-spin" />
+                                ) : (
+                                  <Check className="w-3 h-3" />
+                                )}
                                 Mark all read
                               </button>
                             )}
@@ -290,12 +307,12 @@ export function ArenaHeader() {
                           <div className="max-h-80 overflow-y-auto">
                             {loadingNotifications ? (
                               <div className="py-8 flex items-center justify-center">
-                                <Loader2 className="w-5 h-5 animate-spin text-[#9C9894]" />
+                                <Loader2 className="w-5 h-5 animate-spin text-[var(--arena-text-faint)]" />
                               </div>
                             ) : notifications.length === 0 ? (
                               <div className="py-8 text-center">
-                                <Bell className="w-8 h-8 text-[#E0DEDB] mx-auto mb-2" />
-                                <p className="text-sm text-[#9C9894]">No notifications yet</p>
+                                <Bell className="w-8 h-8 text-[var(--arena-border)] mx-auto mb-2" />
+                                <p className="text-sm text-[var(--arena-text-faint)]">No notifications yet</p>
                               </div>
                             ) : (
                               notifications.map((notification) => {
@@ -318,12 +335,12 @@ export function ArenaHeader() {
                                       }
                                       setIsNotificationsOpen(false)
                                     }}
-                                    className={`flex items-start gap-3 px-4 py-3 hover:bg-[#E0DEDB]/50 transition-colors ${
-                                      !notification.read ? "bg-blue-50/80" : ""
+                                    className={`flex items-start gap-3 px-4 py-3 hover:bg-[var(--arena-text)]/5 transition-colors ${
+                                      !notification.read ? "bg-blue-500/10" : ""
                                     }`}
                                   >
                                     {/* Actor Avatar */}
-                                    <div className="w-8 h-8 rounded-full bg-[#37322f] text-white flex items-center justify-center text-xs font-medium overflow-hidden flex-shrink-0">
+                                    <div className="w-8 h-8 rounded-full bg-[var(--arena-text)] text-[var(--arena-bg)] flex items-center justify-center text-xs font-medium overflow-hidden flex-shrink-0">
                                       {notification.actor.avatar_url ? (
                                         <img
                                           src={notification.actor.avatar_url}
@@ -337,19 +354,19 @@ export function ArenaHeader() {
 
                                     {/* Content */}
                                     <div className="flex-1 min-w-0">
-                                      <p className="text-sm text-[#37322f]">
+                                      <p className="text-sm text-[var(--arena-text)]">
                                         <span className="font-medium">
                                           {notification.actor.full_name || notification.actor.username}
                                         </span>{" "}
                                         {message}
                                         {notification.post && (
-                                          <span className="text-[#605A57]">
+                                          <span className="text-[var(--arena-text-muted)]">
                                             : {notification.post.title.slice(0, 30)}
                                             {notification.post.title.length > 30 ? "..." : ""}
                                           </span>
                                         )}
                                       </p>
-                                      <p className="text-xs text-[#9C9894] mt-0.5">
+                                      <p className="text-xs text-[var(--arena-text-faint)] mt-0.5">
                                         {formatDistanceToNow(new Date(notification.created_at), {
                                           addSuffix: true,
                                         })}
@@ -361,7 +378,7 @@ export function ArenaHeader() {
                                       <Icon className={`w-4 h-4 ${
                                         notification.type === "follow" ? "text-blue-500" :
                                         notification.type === "reaction" ? "text-red-500" :
-                                        "text-[#9C9894]"
+                                        "text-[var(--arena-text-faint)]"
                                       }`} />
                                     </div>
                                   </Link>
@@ -372,11 +389,11 @@ export function ArenaHeader() {
 
                           {/* Footer */}
                           {notifications.length > 0 && (
-                            <div className="border-t border-[#E0DEDB]/60 p-2">
+                            <div className="border-t border-[var(--arena-border)] p-2">
                               <Link
                                 href="/arena/notifications"
                                 onClick={() => setIsNotificationsOpen(false)}
-                                className="block text-center text-sm text-[#605A57] hover:text-[#37322f] py-2 rounded-lg hover:bg-[#f7f5f3] transition-colors"
+                                className="block text-center text-sm text-[var(--arena-text-muted)] hover:text-[var(--arena-text)] py-2 rounded-lg hover:bg-[var(--arena-text)]/5 transition-colors"
                               >
                                 View all notifications
                               </Link>
@@ -390,7 +407,7 @@ export function ArenaHeader() {
                   {/* New Post Button */}
                   <Link
                     href="/arena/new"
-                    className="hidden sm:flex items-center gap-2 bg-[#37322F] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#4a443f] transition-colors"
+                    className="hidden sm:flex items-center gap-2 bg-[var(--arena-text)] text-[var(--arena-bg)] px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-colors"
                   >
                     <PenSquare className="w-4 h-4" />
                     New Post
@@ -399,7 +416,7 @@ export function ArenaHeader() {
                   {/* Mobile New Post */}
                   <Link
                     href="/arena/new"
-                    className="sm:hidden p-2 bg-[#37322F] text-white rounded-lg hover:bg-[#4a443f] transition-colors"
+                    className="sm:hidden p-2 bg-[var(--arena-text)] text-[var(--arena-bg)] rounded-lg hover:opacity-90 transition-colors"
                   >
                     <PenSquare className="w-4 h-4" />
                   </Link>
@@ -408,9 +425,9 @@ export function ArenaHeader() {
                   <div className="relative" ref={dropdownRef}>
                     <button
                       onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                      className="flex items-center gap-1.5 p-1 rounded-lg hover:bg-[#37322f]/5 transition-colors"
+                      className="flex items-center gap-1.5 p-1 rounded-lg hover:bg-[var(--arena-text)]/5 transition-colors"
                     >
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#37322f] to-[#5a524d] text-white flex items-center justify-center text-sm font-medium overflow-hidden ring-2 ring-white">
+                      <div className="w-8 h-8 rounded-full bg-[var(--arena-text)] text-[var(--arena-bg)] flex items-center justify-center text-sm font-medium overflow-hidden ring-2 ring-[var(--arena-card)]">
                         {profile?.avatar_url ? (
                           <img
                             src={profile.avatar_url}
@@ -421,7 +438,7 @@ export function ArenaHeader() {
                           (profile?.full_name?.[0] || profile?.username?.[0] || "U").toUpperCase()
                         )}
                       </div>
-                      <ChevronDown className={`w-3.5 h-3.5 text-[#605A57] transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                      <ChevronDown className={`w-3.5 h-3.5 text-[var(--arena-text-muted)] transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
                     </button>
 
                     <AnimatePresence>
@@ -431,14 +448,14 @@ export function ArenaHeader() {
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: 8, scale: 0.96 }}
                           transition={{ duration: 0.15 }}
-                          className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-[#E0DEDB]/60 overflow-hidden"
+                          className="absolute right-0 mt-2 w-56 bg-[var(--arena-card)] rounded-xl shadow-lg border border-[var(--arena-border)] overflow-hidden"
                         >
                           {/* User Info */}
-                          <div className="px-4 py-3 border-b border-[#E0DEDB]/60">
-                            <p className="font-medium text-[#37322f] truncate text-sm">
+                          <div className="px-4 py-3 border-b border-[var(--arena-border)]">
+                            <p className="font-medium text-[var(--arena-text)] truncate text-sm">
                               {profile?.full_name || profile?.username}
                             </p>
-                            <p className="text-xs text-[#9C9894] truncate">
+                            <p className="text-xs text-[var(--arena-text-faint)] truncate">
                               @{profile?.username}
                             </p>
                           </div>
@@ -448,45 +465,45 @@ export function ArenaHeader() {
                             <Link
                               href={`/arena/profile/${profile?.username}`}
                               onClick={() => setIsDropdownOpen(false)}
-                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#37322f] hover:bg-[#f7f5f3] transition-colors"
+                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--arena-text)] hover:bg-[var(--arena-text)]/5 transition-colors"
                             >
-                              <User className="w-4 h-4 text-[#9C9894]" />
+                              <User className="w-4 h-4 text-[var(--arena-text-faint)]" />
                               Your Profile
                             </Link>
                             <Link
                               href={`/arena/profile/${profile?.username}?tab=posts`}
                               onClick={() => setIsDropdownOpen(false)}
-                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#37322f] hover:bg-[#f7f5f3] transition-colors"
+                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--arena-text)] hover:bg-[var(--arena-text)]/5 transition-colors"
                             >
-                              <FileText className="w-4 h-4 text-[#9C9894]" />
+                              <FileText className="w-4 h-4 text-[var(--arena-text-faint)]" />
                               Your Posts
                             </Link>
                             <Link
                               href="/arena/bookmarks"
                               onClick={() => setIsDropdownOpen(false)}
-                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#37322f] hover:bg-[#f7f5f3] transition-colors"
+                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--arena-text)] hover:bg-[var(--arena-text)]/5 transition-colors"
                             >
-                              <Bookmark className="w-4 h-4 text-[#9C9894]" />
+                              <Bookmark className="w-4 h-4 text-[var(--arena-text-faint)]" />
                               Bookmarks
                             </Link>
                             <Link
                               href="/arena/settings"
                               onClick={() => setIsDropdownOpen(false)}
-                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#37322f] hover:bg-[#f7f5f3] transition-colors"
+                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--arena-text)] hover:bg-[var(--arena-text)]/5 transition-colors"
                             >
-                              <Settings className="w-4 h-4 text-[#9C9894]" />
+                              <Settings className="w-4 h-4 text-[var(--arena-text-faint)]" />
                               Settings
                             </Link>
                           </div>
 
                           {/* Sign Out */}
-                          <div className="border-t border-[#E0DEDB]/60 py-1">
+                          <div className="border-t border-[var(--arena-border)] py-1">
                             <button
                               onClick={() => {
                                 setIsDropdownOpen(false)
                                 setShowSignOutConfirm(true)
                               }}
-                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 w-full transition-colors"
+                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-500/10 w-full transition-colors"
                             >
                               <LogOut className="w-4 h-4" />
                               Sign Out
@@ -500,7 +517,7 @@ export function ArenaHeader() {
               ) : (
                 <Link
                   href="/arena/login"
-                  className="bg-[#37322F] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#4a443f] transition-colors"
+                  className="bg-[var(--arena-text)] text-[var(--arena-bg)] px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-colors"
                 >
                   Enter The Arena
                 </Link>
@@ -525,22 +542,22 @@ export function ArenaHeader() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl"
+              className="bg-[var(--arena-card)] rounded-2xl p-6 max-w-sm w-full shadow-2xl"
             >
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
-                  <LogOut className="w-5 h-5 text-red-600" />
+                <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center">
+                  <LogOut className="w-5 h-5 text-red-500" />
                 </div>
                 <div>
-                  <h3 className="font-medium text-[#37322f]">Sign out?</h3>
-                  <p className="text-xs text-[#9C9894]">You can always sign back in</p>
+                  <h3 className="font-medium text-[var(--arena-text)]">Sign out?</h3>
+                  <p className="text-xs text-[var(--arena-text-faint)]">You can always sign back in</p>
                 </div>
               </div>
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowSignOutConfirm(false)}
                   disabled={signingOut}
-                  className="flex-1 px-4 py-2.5 text-sm text-[#37322f] hover:bg-[#f7f5f3] rounded-lg transition-colors disabled:opacity-50"
+                  className="flex-1 px-4 py-2.5 text-sm text-[var(--arena-text)] hover:bg-[var(--arena-text)]/5 rounded-lg transition-colors disabled:opacity-50"
                 >
                   Cancel
                 </button>
