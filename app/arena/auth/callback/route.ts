@@ -37,14 +37,8 @@ export async function GET(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set(name, value, {
-              ...options,
-              // Ensure cookies are properly accessible
-              path: '/',
-              sameSite: 'lax',
-              secure: process.env.NODE_ENV === 'production',
-              httpOnly: true,
-            })
+            // Let Supabase handle cookie options - don't override
+            response.cookies.set(name, value, options)
           })
         },
       },

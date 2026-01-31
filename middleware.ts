@@ -2,6 +2,11 @@ import { type NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 
 export async function middleware(request: NextRequest) {
+  // Skip middleware for auth callback - let it handle cookies without interference
+  if (request.nextUrl.pathname.startsWith('/arena/auth')) {
+    return
+  }
+
   return await updateSession(request)
 }
 
