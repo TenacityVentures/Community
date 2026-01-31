@@ -1,12 +1,15 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { PostCard, PostCardSkeleton, EmptyPostState } from "@/components/arena/post-card"
 import { motion } from "framer-motion"
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
 import type { PostWithAuthor } from "@/lib/supabase/types"
 import Link from "next/link"
+
+const POSTS_PER_PAGE = 10
 
 const categories = [
   { slug: "all", label: "All Posts", icon: "✨" },
@@ -20,45 +23,76 @@ const categories = [
 export function ArenaContent() {
   const searchParams = useSearchParams()
   const categoryParam = searchParams.get("category")
+  const pageParam = searchParams.get("page")
+
   const [posts, setPosts] = useState<PostWithAuthor[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [activeCategory, setActiveCategory] = useState(categoryParam || "all")
+  const [currentPage, setCurrentPage] = useState(pageParam ? parseInt(pageParam) : 1)
+  const [totalCount, setTotalCount] = useState(0)
+  const [hasMore, setHasMore] = useState(false)
+
   const supabase = createClient()
 
   useEffect(() => {
     setActiveCategory(categoryParam || "all")
+    setCurrentPage(1)
   }, [categoryParam])
 
-  useEffect(() => {
-    async function fetchPosts() {
+  const fetchPosts = useCallback(async (page: number, append = false) => {
+    if (append) {
+      setLoadingMore(true)
+    } else {
       setLoading(true)
+    }
 
-      let query = (supabase
-        .from("posts") as any)
-        .select(`
-          *,
-          author:profiles!posts_author_id_fkey(*)
-        `)
-        .eq("published", true)
-        .order("created_at", { ascending: false })
+    const from = (page - 1) * POSTS_PER_PAGE
+    const to = from + POSTS_PER_PAGE - 1
 
-      if (activeCategory && activeCategory !== "all") {
-        query = query.eq("category", activeCategory)
-      }
+    let query = (supabase
+      .from("posts") as any)
+      .select(`
+        *,
+        author:profiles!posts_author_id_fkey(*)
+      `, { count: 'exact' })
+      .eq("published", true)
+      .order("created_at", { ascending: false })
+      .range(from, to)
 
-      const { data, error } = await query
+    if (activeCategory && activeCategory !== "all") {
+      query = query.eq("category", activeCategory)
+    }
 
-      if (error) {
-        console.error("Error fetching posts:", error)
+    const { data, error, count } = await query
+
+    if (error) {
+      console.error("Error fetching posts:", error)
+    } else {
+      if (append) {
+        setPosts(prev => [...prev, ...(data as PostWithAuthor[] || [])])
       } else {
         setPosts(data as PostWithAuthor[] || [])
       }
-
-      setLoading(false)
+      setTotalCount(count || 0)
+      setHasMore((count || 0) > page * POSTS_PER_PAGE)
     }
 
-    fetchPosts()
-  }, [activeCategory])
+    setLoading(false)
+    setLoadingMore(false)
+  }, [activeCategory, supabase])
+
+  useEffect(() => {
+    fetchPosts(1)
+  }, [activeCategory, fetchPosts])
+
+  const loadMore = () => {
+    const nextPage = currentPage + 1
+    setCurrentPage(nextPage)
+    fetchPosts(nextPage, true)
+  }
+
+  const totalPages = Math.ceil(totalCount / POSTS_PER_PAGE)
 
   return (
     <>
@@ -137,18 +171,55 @@ export function ArenaContent() {
           ) : posts.length === 0 ? (
             <EmptyPostState category={activeCategory !== "all" ? activeCategory : undefined} />
           ) : (
-            <div className="space-y-4">
-              {posts.map((post, index) => (
-                <motion.div
-                  key={post.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.05 }}
-                >
-                  <PostCard post={post} />
-                </motion.div>
-              ))}
-            </div>
+            <>
+              <div className="space-y-4">
+                {posts.map((post, index) => (
+                  <motion.div
+                    key={post.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: Math.min(index * 0.05, 0.3) }}
+                  >
+                    <PostCard post={post} />
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Load More / Pagination */}
+              {hasMore && (
+                <div className="mt-8 text-center">
+                  <button
+                    onClick={loadMore}
+                    disabled={loadingMore}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-white border-2 border-[#E0DEDB] rounded-xl text-[#37322f] font-medium hover:border-[#37322f] hover:bg-[#f7f5f3] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loadingMore ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Loading...
+                      </>
+                    ) : (
+                      <>
+                        Load More Posts
+                        <ChevronRight className="w-4 h-4" />
+                      </>
+                    )}
+                  </button>
+                  <p className="mt-3 text-sm text-[#605A57]">
+                    Showing {posts.length} of {totalCount} posts
+                  </p>
+                </div>
+              )}
+
+              {/* All loaded indicator */}
+              {!hasMore && posts.length > 0 && totalCount > POSTS_PER_PAGE && (
+                <div className="mt-8 text-center">
+                  <p className="text-sm text-[#605A57]">
+                    You've reached the end! {totalCount} posts total.
+                  </p>
+                </div>
+              )}
+            </>
           )}
         </motion.div>
       </div>

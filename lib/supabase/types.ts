@@ -189,6 +189,26 @@ export interface Database {
           created_at?: string
         }
       }
+      bookmarks: {
+        Row: {
+          id: string
+          user_id: string
+          post_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          post_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          post_id?: string
+          created_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
@@ -210,6 +230,7 @@ export type Post = Database['public']['Tables']['posts']['Row']
 export type Comment = Database['public']['Tables']['comments']['Row']
 export type Reaction = Database['public']['Tables']['reactions']['Row']
 export type Follow = Database['public']['Tables']['follows']['Row']
+export type Bookmark = Database['public']['Tables']['bookmarks']['Row']
 
 // Extended types with relations
 export type PostWithAuthor = Post & {
@@ -224,4 +245,9 @@ export type PostWithDetails = Post & {
   author: Profile
   comments: CommentWithAuthor[]
   reactions: Reaction[]
+}
+
+// Comment with replies for threaded comments
+export type CommentWithReplies = CommentWithAuthor & {
+  replies?: CommentWithReplies[]
 }
