@@ -1,4 +1,5 @@
 import { AuthProvider } from "@/lib/supabase/auth-context"
+import { ThemeProvider } from "@/lib/theme-context"
 import type { Metadata } from "next"
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://10na.city'
@@ -39,8 +40,10 @@ export default function ArenaLayout({
   children: React.ReactNode
 }) {
   return (
-    <AuthProvider>
-      {children}
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        {children}
+      </AuthProvider>
+    </ThemeProvider>
   )
 }

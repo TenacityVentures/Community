@@ -40,6 +40,42 @@
   /* Updated font variables with explicit fallbacks for deployment */
   --font-inter: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-instrument-serif: "Instrument Serif", ui-serif, serif;
+  /* Arena-specific colors */
+  --arena-bg: #f7f5f3;
+  --arena-card: #ffffff;
+  --arena-text: #37322f;
+  --arena-text-muted: #605A57;
+  --arena-text-faint: #9C9894;
+  --arena-border: #E0DEDB;
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.985 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.350 0 0);
+  --input: oklch(0.269 0 0);
+  --ring: oklch(0.556 0 0);
+  /* Arena-specific colors - dark mode */
+  --arena-bg: #1a1816;
+  --arena-card: #252220;
+  --arena-text: #f5f3f1;
+  --arena-text-muted: #a8a5a0;
+  --arena-text-faint: #6b6660;
+  --arena-border: #3d3935;
 }
 
 @theme inline {

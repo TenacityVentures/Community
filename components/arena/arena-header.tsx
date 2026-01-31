@@ -15,11 +15,15 @@ import {
   Loader2,
   Bell,
   FileText,
+  Sun,
+  Moon,
 } from "lucide-react"
+import { useTheme } from "@/lib/theme-context"
 
 export function ArenaHeader() {
   const router = useRouter()
   const { user, profile, loading, signOut } = useAuth()
+  const { theme, setTheme, resolvedTheme } = useTheme()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [showSignOutConfirm, setShowSignOutConfirm] = useState(false)
   const [signingOut, setSigningOut] = useState(false)
@@ -70,9 +74,18 @@ export function ArenaHeader() {
                 <div className="w-8 h-8 rounded-full bg-[#E0DEDB] animate-pulse" />
               ) : user ? (
                 <>
+                  {/* Theme Toggle */}
+                  <button
+                    onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+                    className="p-2 text-[#605A57] hover:text-[#37322f] hover:bg-[#37322f]/5 dark:text-[#a8a5a0] dark:hover:text-[#f5f3f1] dark:hover:bg-white/5 rounded-lg transition-colors"
+                    title={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                  >
+                    {resolvedTheme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                  </button>
+
                   {/* Notifications - placeholder for now */}
                   <button
-                    className="p-2 text-[#605A57] hover:text-[#37322f] hover:bg-[#37322f]/5 rounded-lg transition-colors relative"
+                    className="p-2 text-[#605A57] hover:text-[#37322f] hover:bg-[#37322f]/5 dark:text-[#a8a5a0] dark:hover:text-[#f5f3f1] dark:hover:bg-white/5 rounded-lg transition-colors relative"
                     title="Notifications"
                   >
                     <Bell className="w-5 h-5" />
