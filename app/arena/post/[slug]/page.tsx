@@ -31,10 +31,28 @@ import {
   ChevronUp,
   Check,
   CornerDownRight,
+  ArrowUp,
+  Clock,
+  Twitter,
+  Linkedin,
+  Link as LinkIcon,
 } from "lucide-react"
 import type { PostWithAuthor, CommentWithAuthor, PostCategory, ReactionType, Reaction, CommentWithReplies } from "@/lib/supabase/types"
 
 const COMMENTS_PER_PAGE = 5
+
+// Calculate reading time based on word count
+function calculateReadingTime(content: any): number {
+  if (!content) return 1
+  try {
+    const text = JSON.stringify(content)
+    const words = text.replace(/<[^>]*>/g, '').split(/\s+/).filter(Boolean).length
+    const wordsPerMinute = 200
+    return Math.max(1, Math.ceil(words / wordsPerMinute))
+  } catch {
+    return 1
+  }
+}
 
 const categoryStyles: Record<PostCategory, { bg: string; text: string; icon: string }> = {
   building: { bg: "bg-amber-50", text: "text-amber-700", icon: "🛠️" },
@@ -380,9 +398,12 @@ export default function PostPage() {
   const [loadingMoreComments, setLoadingMoreComments] = useState(false)
   const [totalComments, setTotalComments] = useState(0)
   const [rootCommentCount, setRootCommentCount] = useState(0)
+  const [showShareMenu, setShowShareMenu] = useState(false)
+  const [showBackToTop, setShowBackToTop] = useState(false)
 
   const postMenuRef = useRef<HTMLDivElement>(null)
   const reactionsRef = useRef<HTMLDivElement>(null)
+  const shareMenuRef = useRef<HTMLDivElement>(null)
 
   const isAuthor = user?.id === post?.author_id
 
@@ -394,9 +415,21 @@ export default function PostPage() {
       if (reactionsRef.current && !reactionsRef.current.contains(event.target as Node)) {
         setShowReactions(false)
       }
+      if (shareMenuRef.current && !shareMenuRef.current.contains(event.target as Node)) {
+        setShowShareMenu(false)
+      }
     }
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
+  // Show back to top button on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 400)
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   const fetchReactions = useCallback(async (postId: string) => {
@@ -630,10 +663,32 @@ export default function PostPage() {
     if (navigator.share) {
       await navigator.share({ title: post?.title, url: window.location.href })
     } else {
-      await navigator.clipboard.writeText(window.location.href)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      setShowShareMenu(!showShareMenu)
     }
+  }
+
+  const handleCopyLink = async () => {
+    await navigator.clipboard.writeText(window.location.href)
+    setCopied(true)
+    setShowShareMenu(false)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  const handleShareTwitter = () => {
+    const text = encodeURIComponent(`${post?.title} by @${post?.author.username}`)
+    const url = encodeURIComponent(window.location.href)
+    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank', 'width=550,height=420')
+    setShowShareMenu(false)
+  }
+
+  const handleShareLinkedIn = () => {
+    const url = encodeURIComponent(window.location.href)
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank', 'width=550,height=420')
+    setShowShareMenu(false)
+  }
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const reactionCounts = reactions.reduce((acc, r) => {
@@ -736,7 +791,14 @@ export default function PostPage() {
                 <Link href={`/arena/profile/${post.author.username}`} className="font-medium text-[#37322f] hover:underline text-sm">
                   {post.author.full_name || post.author.username}
                 </Link>
-                <p className="text-xs text-[#9C9894]">{timeAgo}</p>
+                <div className="flex items-center gap-2 text-xs text-[#9C9894]">
+                  <span>{timeAgo}</span>
+                  <span>·</span>
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3 h-3" />
+                    {calculateReadingTime(post.content)} min read
+                  </span>
+                </div>
               </div>
             </div>
           </header>
@@ -784,9 +846,47 @@ export default function PostPage() {
             </div>
 
             <div className="flex items-center gap-1">
-              <button onClick={handleShare} className="p-2 text-[#9C9894] hover:text-[#37322f] hover:bg-[#f7f5f3] rounded-lg transition-colors">
-                {copied ? <Check className="w-5 h-5 text-green-600" /> : <Share2 className="w-5 h-5" />}
-              </button>
+              {/* Share Menu */}
+              <div className="relative" ref={shareMenuRef}>
+                <button
+                  onClick={handleShare}
+                  className="p-2 text-[#9C9894] hover:text-[#37322f] hover:bg-[#f7f5f3] rounded-lg transition-colors"
+                >
+                  {copied ? <Check className="w-5 h-5 text-green-600" /> : <Share2 className="w-5 h-5" />}
+                </button>
+                <AnimatePresence>
+                  {showShareMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 8 }}
+                      className="absolute right-0 bottom-full mb-2 bg-white rounded-xl shadow-lg border border-[#E0DEDB]/60 py-1 min-w-[160px] z-10"
+                    >
+                      <button
+                        onClick={handleShareTwitter}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[#37322f] hover:bg-[#f7f5f3] transition-colors"
+                      >
+                        <Twitter className="w-4 h-4 text-[#1DA1F2]" />
+                        Share on X
+                      </button>
+                      <button
+                        onClick={handleShareLinkedIn}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[#37322f] hover:bg-[#f7f5f3] transition-colors"
+                      >
+                        <Linkedin className="w-4 h-4 text-[#0A66C2]" />
+                        Share on LinkedIn
+                      </button>
+                      <button
+                        onClick={handleCopyLink}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[#37322f] hover:bg-[#f7f5f3] transition-colors"
+                      >
+                        <LinkIcon className="w-4 h-4 text-[#9C9894]" />
+                        Copy link
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
               <button onClick={handleBookmark} className={`p-2 rounded-lg transition-colors ${isBookmarked ? 'text-[#37322f] bg-[#37322f]/10' : 'text-[#9C9894] hover:text-[#37322f] hover:bg-[#f7f5f3]'}`}>
                 {isBookmarked ? <BookmarkCheck className="w-5 h-5" /> : <Bookmark className="w-5 h-5" />}
               </button>
@@ -899,6 +999,22 @@ export default function PostPage() {
               </div>
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Back to Top Button */}
+      <AnimatePresence>
+        {showBackToTop && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            onClick={scrollToTop}
+            className="fixed bottom-6 right-6 p-3 bg-[#37322f] text-white rounded-full shadow-lg hover:bg-[#4a443f] transition-colors z-40"
+            title="Back to top"
+          >
+            <ArrowUp className="w-5 h-5" />
+          </motion.button>
         )}
       </AnimatePresence>
     </div>
