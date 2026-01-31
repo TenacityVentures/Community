@@ -113,12 +113,12 @@ export default function BookmarksPage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-[#f7f5f3]">
+      <div className="min-h-screen bg-[var(--arena-bg)]">
         <ArenaHeader />
         <main className="max-w-[800px] mx-auto px-4 py-8">
           <div className="animate-pulse space-y-4">
-            <div className="h-8 w-48 bg-[#E0DEDB] rounded" />
-            <div className="h-4 w-64 bg-[#E0DEDB] rounded" />
+            <div className="h-8 w-48 bg-[var(--arena-border)] rounded" />
+            <div className="h-4 w-64 bg-[var(--arena-border)] rounded" />
           </div>
         </main>
       </div>
@@ -126,7 +126,7 @@ export default function BookmarksPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f7f5f3]">
+    <div className="min-h-screen bg-[var(--arena-bg)]">
       <ArenaHeader />
 
       <main className="max-w-[800px] mx-auto px-4 py-8">
@@ -137,7 +137,7 @@ export default function BookmarksPage() {
         >
           <Link
             href="/arena"
-            className="inline-flex items-center gap-2 text-[#9C9894] hover:text-[#37322f] transition-colors mb-6 text-sm"
+            className="inline-flex items-center gap-2 text-[var(--arena-text-faint)] hover:text-[var(--arena-text)] transition-colors mb-6 text-sm"
           >
             <ArrowLeft className="w-4 h-4" />
             Back
@@ -145,12 +145,12 @@ export default function BookmarksPage() {
 
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-xl bg-[#37322f]/10 flex items-center justify-center">
-                <Bookmark className="w-5 h-5 text-[#37322f]" />
+              <div className="w-10 h-10 rounded-xl bg-[var(--arena-text)]/10 flex items-center justify-center">
+                <Bookmark className="w-5 h-5 text-[var(--arena-text)]" />
               </div>
-              <h1 className="font-instrument-serif text-3xl text-[#37322f]">Bookmarks</h1>
+              <h1 className="font-instrument-serif text-3xl text-[var(--arena-text)]">Bookmarks</h1>
             </div>
-            <p className="text-sm text-[#9C9894] ml-[52px]">
+            <p className="text-sm text-[var(--arena-text-faint)] ml-[52px]">
               {total > 0 ? `${total} saved ${total === 1 ? 'post' : 'posts'}` : 'Save posts to read later'}
             </p>
           </div>
@@ -163,16 +163,16 @@ export default function BookmarksPage() {
             </div>
           ) : bookmarks.length === 0 ? (
             <div className="text-center py-16">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-[#37322f]/5 flex items-center justify-center">
-                <Bookmark className="w-8 h-8 text-[#9C9894]" />
+              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-[var(--arena-text)]/5 flex items-center justify-center">
+                <Bookmark className="w-8 h-8 text-[var(--arena-text-faint)]" />
               </div>
-              <h3 className="text-lg font-medium text-[#37322f] mb-2">No bookmarks yet</h3>
-              <p className="text-sm text-[#9C9894] mb-6 max-w-xs mx-auto">
+              <h3 className="text-lg font-medium text-[var(--arena-text)] mb-2">No bookmarks yet</h3>
+              <p className="text-sm text-[var(--arena-text-faint)] mb-6 max-w-xs mx-auto">
                 When you bookmark posts, they'll appear here for easy access.
               </p>
               <Link
                 href="/arena"
-                className="inline-flex items-center gap-2 bg-[#37322F] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#4a443f] transition-colors"
+                className="inline-flex items-center gap-2 bg-[var(--arena-text)] text-[var(--arena-bg)] px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-colors"
               >
                 Explore The Arena
               </Link>
@@ -194,7 +194,7 @@ export default function BookmarksPage() {
                         e.preventDefault()
                         handleRemoveBookmark(post.id)
                       }}
-                      className="absolute top-4 right-4 p-2 bg-white/90 backdrop-blur rounded-lg text-[#37322f] opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:bg-white"
+                      className="absolute top-4 right-4 p-2 bg-[var(--arena-card)]/90 backdrop-blur rounded-lg text-[var(--arena-text)] opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:bg-[var(--arena-card)]"
                       title="Remove bookmark"
                     >
                       <Bookmark className="w-4 h-4 fill-current" />
@@ -208,7 +208,7 @@ export default function BookmarksPage() {
                   <button
                     onClick={loadMore}
                     disabled={loadingMore}
-                    className="inline-flex items-center gap-2 px-4 py-2 text-sm text-[#605A57] hover:text-[#37322f] transition-colors disabled:opacity-50"
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm text-[var(--arena-text-muted)] hover:text-[var(--arena-text)] transition-colors disabled:opacity-50"
                   >
                     {loadingMore ? (
                       <>

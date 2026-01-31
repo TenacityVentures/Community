@@ -23,9 +23,9 @@ import {
 import type { Profile, PostWithAuthor } from "@/lib/supabase/types"
 
 const roleLabels = {
-  builder: { label: "Builder", bg: "bg-amber-50", text: "text-amber-700" },
-  partner: { label: "Partner", bg: "bg-blue-50", text: "text-blue-700" },
-  learner: { label: "Learner", bg: "bg-green-50", text: "text-green-700" },
+  builder: { label: "Builder", bg: "bg-amber-100 dark:bg-amber-900/30", text: "text-amber-700 dark:text-amber-300" },
+  partner: { label: "Partner", bg: "bg-blue-100 dark:bg-blue-900/30", text: "text-blue-700 dark:text-blue-300" },
+  learner: { label: "Learner", bg: "bg-green-100 dark:bg-green-900/30", text: "text-green-700 dark:text-green-300" },
 }
 
 export default function ProfilePage() {
@@ -155,15 +155,15 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f7f5f3]">
+      <div className="min-h-screen bg-[var(--arena-bg)]">
         <ArenaHeader />
         <main className="max-w-[800px] mx-auto px-4 py-8">
           <div className="animate-pulse">
             <div className="flex items-center gap-6 mb-8">
-              <div className="w-24 h-24 rounded-full bg-[#E0DEDB]" />
+              <div className="w-24 h-24 rounded-full bg-[var(--arena-border)]" />
               <div className="space-y-2">
-                <div className="h-8 w-48 bg-[#E0DEDB] rounded" />
-                <div className="h-4 w-32 bg-[#E0DEDB] rounded" />
+                <div className="h-8 w-48 bg-[var(--arena-border)] rounded" />
+                <div className="h-4 w-32 bg-[var(--arena-border)] rounded" />
               </div>
             </div>
             <div className="space-y-4">
@@ -178,14 +178,14 @@ export default function ProfilePage() {
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-[#f7f5f3]">
+      <div className="min-h-screen bg-[var(--arena-bg)]">
         <ArenaHeader />
         <main className="max-w-[800px] mx-auto px-4 py-16 text-center">
-          <h1 className="font-instrument-serif text-3xl text-[#37322f] mb-4">User Not Found</h1>
-          <p className="text-[#605A57] mb-6">This user doesn't exist or has been removed.</p>
+          <h1 className="font-instrument-serif text-3xl text-[var(--arena-text)] mb-4">User Not Found</h1>
+          <p className="text-[var(--arena-text-muted)] mb-6">This user doesn't exist or has been removed.</p>
           <Link
             href="/arena"
-            className="inline-flex items-center gap-2 text-[#37322f] hover:text-[#605A57] transition-colors"
+            className="inline-flex items-center gap-2 text-[var(--arena-text)] hover:text-[var(--arena-text-muted)] transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to The Arena
@@ -199,7 +199,7 @@ export default function ProfilePage() {
   const joinedDate = formatDistanceToNow(new Date(profile.created_at), { addSuffix: true })
 
   return (
-    <div className="min-h-screen bg-[#f7f5f3]">
+    <div className="min-h-screen bg-[var(--arena-bg)]">
       <ArenaHeader />
 
       <main className="max-w-[800px] mx-auto px-4 py-8">
@@ -211,17 +211,17 @@ export default function ProfilePage() {
           {/* Back Button */}
           <Link
             href="/arena"
-            className="inline-flex items-center gap-2 text-[#605A57] hover:text-[#37322f] transition-colors mb-6"
+            className="inline-flex items-center gap-2 text-[var(--arena-text-muted)] hover:text-[var(--arena-text)] transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to The Arena
           </Link>
 
           {/* Profile Header */}
-          <div className="bg-white rounded-2xl border border-[#E0DEDB] p-6 sm:p-8 mb-6">
+          <div className="bg-[var(--arena-card)] rounded-2xl border border-[var(--arena-border)] p-6 sm:p-8 mb-6">
             <div className="flex flex-col sm:flex-row sm:items-start gap-6">
               {/* Avatar */}
-              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-[#37322f] text-white flex items-center justify-center text-3xl font-medium overflow-hidden flex-shrink-0 mx-auto sm:mx-0">
+              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-[var(--arena-text)] text-[var(--arena-bg)] flex items-center justify-center text-3xl font-medium overflow-hidden flex-shrink-0 mx-auto sm:mx-0">
                 {profile.avatar_url ? (
                   <img
                     src={profile.avatar_url}
@@ -236,7 +236,7 @@ export default function ProfilePage() {
               {/* Info */}
               <div className="flex-1 text-center sm:text-left">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-2">
-                  <h1 className="font-instrument-serif text-2xl sm:text-3xl text-[#37322f]">
+                  <h1 className="font-instrument-serif text-2xl sm:text-3xl text-[var(--arena-text)]">
                     {profile.full_name || profile.username}
                   </h1>
                   <span className={`inline-flex self-center px-3 py-1 rounded-full text-xs font-medium ${role.bg} ${role.text}`}>
@@ -244,14 +244,14 @@ export default function ProfilePage() {
                   </span>
                 </div>
 
-                <p className="text-[#605A57] mb-4">@{profile.username}</p>
+                <p className="text-[var(--arena-text-muted)] mb-4">@{profile.username}</p>
 
                 {profile.bio && (
-                  <p className="text-[#37322f] mb-4 max-w-lg">{profile.bio}</p>
+                  <p className="text-[var(--arena-text)] mb-4 max-w-lg">{profile.bio}</p>
                 )}
 
                 {/* Meta Info */}
-                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-sm text-[#605A57]">
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-sm text-[var(--arena-text-muted)]">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-4 h-4" />
                     Joined {joinedDate}
@@ -261,7 +261,7 @@ export default function ProfilePage() {
                       href={profile.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1 hover:text-[#37322f] transition-colors"
+                      className="flex items-center gap-1 hover:text-[var(--arena-text)] transition-colors"
                     >
                       <LinkIcon className="w-4 h-4" />
                       Website
@@ -275,7 +275,7 @@ export default function ProfilePage() {
                     {profile.skills.map((skill) => (
                       <span
                         key={skill}
-                        className="px-3 py-1 bg-[#f7f5f3] text-[#605A57] text-sm rounded-full"
+                        className="px-3 py-1 bg-[var(--arena-bg)] text-[var(--arena-text-muted)] text-sm rounded-full"
                       >
                         {skill}
                       </span>
@@ -289,7 +289,7 @@ export default function ProfilePage() {
                 {isOwnProfile ? (
                   <Link
                     href="/arena/settings"
-                    className="flex items-center gap-2 px-4 py-2 border border-[#E0DEDB] rounded-lg text-sm text-[#605A57] hover:border-[#37322f] hover:text-[#37322f] transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 border border-[var(--arena-border)] rounded-lg text-sm text-[var(--arena-text-muted)] hover:border-[var(--arena-text)] hover:text-[var(--arena-text)] transition-colors"
                   >
                     <Settings className="w-4 h-4" />
                     Edit Profile
@@ -300,8 +300,8 @@ export default function ProfilePage() {
                     disabled={followLoading}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
                       isFollowing
-                        ? "border border-[#E0DEDB] text-[#605A57] hover:border-red-300 hover:text-red-600 hover:bg-red-50"
-                        : "bg-[#37322F] text-white hover:bg-[#4a443f]"
+                        ? "border border-[var(--arena-border)] text-[var(--arena-text-muted)] hover:border-red-300 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        : "bg-[var(--arena-text)] text-[var(--arena-bg)] hover:opacity-90"
                     }`}
                   >
                     {followLoading ? (
@@ -321,7 +321,7 @@ export default function ProfilePage() {
                 ) : (
                   <Link
                     href="/arena/login"
-                    className="flex items-center gap-2 px-4 py-2 bg-[#37322F] text-white rounded-lg text-sm font-medium hover:bg-[#4a443f] transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-[var(--arena-text)] text-[var(--arena-bg)] rounded-lg text-sm font-medium hover:opacity-90 transition-colors"
                   >
                     <UserPlus className="w-4 h-4" />
                     <span className="hidden sm:inline">Follow</span>
@@ -332,42 +332,42 @@ export default function ProfilePage() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-4 gap-3 mb-6">
-            <div className="bg-white rounded-xl border border-[#E0DEDB] p-4 text-center">
-              <p className="text-2xl font-semibold text-[#37322f]">{posts.length}</p>
-              <p className="text-sm text-[#605A57]">Posts</p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+            <div className="bg-[var(--arena-card)] rounded-xl border border-[var(--arena-border)] p-4 text-center">
+              <p className="text-2xl font-semibold text-[var(--arena-text)]">{posts.length}</p>
+              <p className="text-sm text-[var(--arena-text-muted)]">Posts</p>
             </div>
-            <div className="bg-white rounded-xl border border-[#E0DEDB] p-4 text-center">
-              <p className="text-2xl font-semibold text-[#37322f]">{followerCount}</p>
-              <p className="text-sm text-[#605A57]">Followers</p>
+            <div className="bg-[var(--arena-card)] rounded-xl border border-[var(--arena-border)] p-4 text-center">
+              <p className="text-2xl font-semibold text-[var(--arena-text)]">{followerCount}</p>
+              <p className="text-sm text-[var(--arena-text-muted)]">Followers</p>
             </div>
-            <div className="bg-white rounded-xl border border-[#E0DEDB] p-4 text-center">
-              <p className="text-2xl font-semibold text-[#37322f]">{followingCount}</p>
-              <p className="text-sm text-[#605A57]">Following</p>
+            <div className="bg-[var(--arena-card)] rounded-xl border border-[var(--arena-border)] p-4 text-center">
+              <p className="text-2xl font-semibold text-[var(--arena-text)]">{followingCount}</p>
+              <p className="text-sm text-[var(--arena-text-muted)]">Following</p>
             </div>
-            <div className="bg-white rounded-xl border border-[#E0DEDB] p-4 text-center">
-              <p className="text-2xl font-semibold text-[#37322f]">
+            <div className="bg-[var(--arena-card)] rounded-xl border border-[var(--arena-border)] p-4 text-center">
+              <p className="text-2xl font-semibold text-[var(--arena-text)]">
                 {posts.reduce((acc, post) => acc + post.view_count, 0)}
               </p>
-              <p className="text-sm text-[#605A57]">Views</p>
+              <p className="text-sm text-[var(--arena-text-muted)]">Views</p>
             </div>
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-4 border-b border-[#E0DEDB] mb-6">
+          <div className="flex gap-4 border-b border-[var(--arena-border)] mb-6">
             <button
               onClick={() => setActiveTab("posts")}
               className={`pb-3 px-1 text-sm font-medium transition-colors relative ${
                 activeTab === "posts"
-                  ? "text-[#37322f]"
-                  : "text-[#605A57] hover:text-[#37322f]"
+                  ? "text-[var(--arena-text)]"
+                  : "text-[var(--arena-text-muted)] hover:text-[var(--arena-text)]"
               }`}
             >
               Posts
               {activeTab === "posts" && (
                 <motion.div
                   layoutId="activeTab"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#37322f]"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--arena-text)]"
                 />
               )}
             </button>
@@ -375,15 +375,15 @@ export default function ProfilePage() {
               onClick={() => setActiveTab("about")}
               className={`pb-3 px-1 text-sm font-medium transition-colors relative ${
                 activeTab === "about"
-                  ? "text-[#37322f]"
-                  : "text-[#605A57] hover:text-[#37322f]"
+                  ? "text-[var(--arena-text)]"
+                  : "text-[var(--arena-text-muted)] hover:text-[var(--arena-text)]"
               }`}
             >
               About
               {activeTab === "about" && (
                 <motion.div
                   layoutId="activeTab"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#37322f]"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--arena-text)]"
                 />
               )}
             </button>
@@ -393,13 +393,13 @@ export default function ProfilePage() {
           {activeTab === "posts" ? (
             posts.length === 0 ? (
               <div className="text-center py-12">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#f7f5f3] flex items-center justify-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[var(--arena-card)] flex items-center justify-center">
                   <span className="text-3xl">✍️</span>
                 </div>
-                <h3 className="font-instrument-serif text-xl text-[#37322f] mb-2">
+                <h3 className="font-instrument-serif text-xl text-[var(--arena-text)] mb-2">
                   {isOwnProfile ? "Share your first post" : "No posts yet"}
                 </h3>
-                <p className="text-[#605A57] mb-4">
+                <p className="text-[var(--arena-text-muted)] mb-4">
                   {isOwnProfile
                     ? "Start sharing your thoughts, ideas, and ventures with the community."
                     : "This user hasn't published any posts yet."}
@@ -407,7 +407,7 @@ export default function ProfilePage() {
                 {isOwnProfile && (
                   <Link
                     href="/arena/new"
-                    className="inline-flex items-center gap-2 bg-[#37322F] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#4a443f] transition-colors"
+                    className="inline-flex items-center gap-2 bg-[var(--arena-text)] text-[var(--arena-bg)] px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-colors"
                   >
                     Write Your First Post
                   </Link>
@@ -428,24 +428,24 @@ export default function ProfilePage() {
               </div>
             )
           ) : (
-            <div className="bg-white rounded-xl border border-[#E0DEDB] p-6">
-              <h3 className="font-instrument-serif text-xl text-[#37322f] mb-4">
+            <div className="bg-[var(--arena-card)] rounded-xl border border-[var(--arena-border)] p-6">
+              <h3 className="font-instrument-serif text-xl text-[var(--arena-text)] mb-4">
                 About {profile.full_name || profile.username}
               </h3>
               {profile.bio ? (
-                <p className="text-[#37322f] whitespace-pre-wrap">{profile.bio}</p>
+                <p className="text-[var(--arena-text)] whitespace-pre-wrap">{profile.bio}</p>
               ) : (
-                <p className="text-[#605A57] italic">No bio provided yet.</p>
+                <p className="text-[var(--arena-text-muted)] italic">No bio provided yet.</p>
               )}
 
               {profile.skills && profile.skills.length > 0 && (
                 <div className="mt-6">
-                  <h4 className="font-medium text-[#37322f] mb-3">Skills & Interests</h4>
+                  <h4 className="font-medium text-[var(--arena-text)] mb-3">Skills & Interests</h4>
                   <div className="flex flex-wrap gap-2">
                     {profile.skills.map((skill) => (
                       <span
                         key={skill}
-                        className="px-3 py-1.5 bg-[#f7f5f3] text-[#37322f] text-sm rounded-lg"
+                        className="px-3 py-1.5 bg-[var(--arena-bg)] text-[var(--arena-text)] text-sm rounded-lg"
                       >
                         {skill}
                       </span>
@@ -456,12 +456,12 @@ export default function ProfilePage() {
 
               {profile.website && (
                 <div className="mt-6">
-                  <h4 className="font-medium text-[#37322f] mb-2">Links</h4>
+                  <h4 className="font-medium text-[var(--arena-text)] mb-2">Links</h4>
                   <a
                     href={profile.website}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-[#37322f] hover:text-[#605A57] transition-colors"
+                    className="inline-flex items-center gap-2 text-[var(--arena-text)] hover:text-[var(--arena-text-muted)] transition-colors"
                   >
                     <LinkIcon className="w-4 h-4" />
                     {profile.website}

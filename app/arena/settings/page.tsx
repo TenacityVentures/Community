@@ -104,8 +104,8 @@ export default function SettingsPage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-[#f7f5f3] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[#37322f] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-[var(--arena-bg)] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[var(--arena-text)] border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
@@ -115,14 +115,14 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f7f5f3]">
+    <div className="min-h-screen bg-[var(--arena-bg)]">
       {/* Header */}
-      <header className="w-full border-b border-[#37322f]/6 bg-[#f7f5f3] sticky top-0 z-40">
+      <header className="w-full border-b border-[var(--arena-border)] bg-[var(--arena-bg)] sticky top-0 z-40">
         <div className="max-w-[600px] mx-auto px-4">
           <nav className="flex items-center justify-between py-4">
             <Link
               href={profile ? `/arena/profile/${profile.username}` : "/arena"}
-              className="flex items-center gap-2 text-[#605A57] hover:text-[#37322f] transition-colors"
+              className="flex items-center gap-2 text-[var(--arena-text-muted)] hover:text-[var(--arena-text)] transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               Back
@@ -130,7 +130,7 @@ export default function SettingsPage() {
             <button
               onClick={handleSubmit}
               disabled={saving}
-              className="flex items-center gap-2 bg-[#37322F] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#4a443f] transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 bg-[var(--arena-text)] text-[var(--arena-bg)] px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-colors disabled:opacity-50"
             >
               {saved ? (
                 <>
@@ -157,8 +157,8 @@ export default function SettingsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 className="font-instrument-serif text-3xl text-[#37322f] mb-2">Settings</h1>
-          <p className="text-[#605A57] mb-8">Manage your profile and preferences</p>
+          <h1 className="font-instrument-serif text-3xl text-[var(--arena-text)] mb-2">Settings</h1>
+          <p className="text-[var(--arena-text-muted)] mb-8">Manage your profile and preferences</p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Error Message */}
@@ -166,17 +166,17 @@ export default function SettingsPage() {
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm"
+                className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg text-sm"
               >
                 {error}
               </motion.div>
             )}
 
             {/* Avatar Section */}
-            <div className="bg-white rounded-xl border border-[#E0DEDB] p-6">
-              <h2 className="font-medium text-[#37322f] mb-4">Profile Picture</h2>
+            <div className="bg-[var(--arena-card)] rounded-xl border border-[var(--arena-border)] p-6">
+              <h2 className="font-medium text-[var(--arena-text)] mb-4">Profile Picture</h2>
               <div className="flex items-center gap-4">
-                <div className="w-20 h-20 rounded-full bg-[#37322f] text-white flex items-center justify-center text-2xl font-medium overflow-hidden">
+                <div className="w-20 h-20 rounded-full bg-[var(--arena-text)] text-[var(--arena-bg)] flex items-center justify-center text-2xl font-medium overflow-hidden">
                   {profile?.avatar_url ? (
                     <img
                       src={profile.avatar_url}
@@ -187,18 +187,18 @@ export default function SettingsPage() {
                     (fullName?.[0] || username?.[0] || "U").toUpperCase()
                   )}
                 </div>
-                <p className="text-sm text-[#605A57]">
+                <p className="text-sm text-[var(--arena-text-muted)]">
                   Profile picture is automatically set from your social login provider.
                 </p>
               </div>
             </div>
 
             {/* Basic Info */}
-            <div className="bg-white rounded-xl border border-[#E0DEDB] p-6 space-y-4">
-              <h2 className="font-medium text-[#37322f] mb-2">Basic Information</h2>
+            <div className="bg-[var(--arena-card)] rounded-xl border border-[var(--arena-border)] p-6 space-y-4">
+              <h2 className="font-medium text-[var(--arena-text)] mb-2">Basic Information</h2>
 
               <div>
-                <label className="block text-sm font-medium text-[#37322f] mb-1">
+                <label className="block text-sm font-medium text-[var(--arena-text)] mb-1">
                   Full Name
                 </label>
                 <input
@@ -206,29 +206,29 @@ export default function SettingsPage() {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Your full name"
-                  className="w-full border-2 border-[#E0DEDB] rounded-lg px-4 py-2.5 text-[#37322f] focus:outline-none focus:border-[#37322f] transition-colors"
+                  className="w-full border-2 border-[var(--arena-border)] bg-[var(--arena-bg)] rounded-lg px-4 py-2.5 text-[var(--arena-text)] placeholder:text-[var(--arena-text-faint)] focus:outline-none focus:border-[var(--arena-text)] transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#37322f] mb-1">
+                <label className="block text-sm font-medium text-[var(--arena-text)] mb-1">
                   Username <span className="text-red-500">*</span>
                 </label>
                 <div className="flex items-center">
-                  <span className="text-[#605A57] mr-1">@</span>
+                  <span className="text-[var(--arena-text-muted)] mr-1">@</span>
                   <input
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value.toLowerCase())}
                     placeholder="username"
-                    className="flex-1 border-2 border-[#E0DEDB] rounded-lg px-4 py-2.5 text-[#37322f] focus:outline-none focus:border-[#37322f] transition-colors"
+                    className="flex-1 border-2 border-[var(--arena-border)] bg-[var(--arena-bg)] rounded-lg px-4 py-2.5 text-[var(--arena-text)] placeholder:text-[var(--arena-text-faint)] focus:outline-none focus:border-[var(--arena-text)] transition-colors"
                     required
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#37322f] mb-1">
+                <label className="block text-sm font-medium text-[var(--arena-text)] mb-1">
                   Bio
                 </label>
                 <textarea
@@ -237,13 +237,13 @@ export default function SettingsPage() {
                   placeholder="Tell us about yourself..."
                   rows={4}
                   maxLength={500}
-                  className="w-full border-2 border-[#E0DEDB] rounded-lg px-4 py-2.5 text-[#37322f] focus:outline-none focus:border-[#37322f] transition-colors resize-none"
+                  className="w-full border-2 border-[var(--arena-border)] bg-[var(--arena-bg)] rounded-lg px-4 py-2.5 text-[var(--arena-text)] placeholder:text-[var(--arena-text-faint)] focus:outline-none focus:border-[var(--arena-text)] transition-colors resize-none"
                 />
-                <p className="text-xs text-[#605A57] mt-1">{bio.length}/500 characters</p>
+                <p className="text-xs text-[var(--arena-text-muted)] mt-1">{bio.length}/500 characters</p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#37322f] mb-1">
+                <label className="block text-sm font-medium text-[var(--arena-text)] mb-1">
                   Website
                 </label>
                 <input
@@ -251,14 +251,14 @@ export default function SettingsPage() {
                   value={website}
                   onChange={(e) => setWebsite(e.target.value)}
                   placeholder="https://yourwebsite.com"
-                  className="w-full border-2 border-[#E0DEDB] rounded-lg px-4 py-2.5 text-[#37322f] focus:outline-none focus:border-[#37322f] transition-colors"
+                  className="w-full border-2 border-[var(--arena-border)] bg-[var(--arena-bg)] rounded-lg px-4 py-2.5 text-[var(--arena-text)] placeholder:text-[var(--arena-text-faint)] focus:outline-none focus:border-[var(--arena-text)] transition-colors"
                 />
               </div>
             </div>
 
             {/* Role */}
-            <div className="bg-white rounded-xl border border-[#E0DEDB] p-6">
-              <h2 className="font-medium text-[#37322f] mb-4">Your Role</h2>
+            <div className="bg-[var(--arena-card)] rounded-xl border border-[var(--arena-border)] p-6">
+              <h2 className="font-medium text-[var(--arena-text)] mb-4">Your Role</h2>
               <div className="grid grid-cols-3 gap-3">
                 {[
                   { value: "builder", label: "Builder", icon: "🛠️" },
@@ -271,27 +271,27 @@ export default function SettingsPage() {
                     onClick={() => setRole(option.value as typeof role)}
                     className={`flex flex-col items-center p-3 rounded-xl border-2 transition-all ${
                       role === option.value
-                        ? "border-[#37322f] bg-[#37322f]/5"
-                        : "border-[#E0DEDB] hover:border-[#37322f]/30"
+                        ? "border-[var(--arena-text)] bg-[var(--arena-text)]/5"
+                        : "border-[var(--arena-border)] hover:border-[var(--arena-text)]/30"
                     }`}
                   >
                     <span className="text-xl mb-1">{option.icon}</span>
-                    <span className="text-sm font-medium text-[#37322f]">{option.label}</span>
+                    <span className="text-sm font-medium text-[var(--arena-text)]">{option.label}</span>
                   </button>
                 ))}
               </div>
             </div>
 
             {/* Skills */}
-            <div className="bg-white rounded-xl border border-[#E0DEDB] p-6">
-              <h2 className="font-medium text-[#37322f] mb-2">Skills & Interests</h2>
-              <p className="text-sm text-[#605A57] mb-4">Add up to 10 skills or interests</p>
+            <div className="bg-[var(--arena-card)] rounded-xl border border-[var(--arena-border)] p-6">
+              <h2 className="font-medium text-[var(--arena-text)] mb-2">Skills & Interests</h2>
+              <p className="text-sm text-[var(--arena-text-muted)] mb-4">Add up to 10 skills or interests</p>
 
               <div className="flex flex-wrap gap-2 mb-3">
                 {skills.map((skill) => (
                   <span
                     key={skill}
-                    className="inline-flex items-center gap-1 px-3 py-1 bg-[#37322f]/10 text-[#37322f] rounded-full text-sm"
+                    className="inline-flex items-center gap-1 px-3 py-1 bg-[var(--arena-text)]/10 text-[var(--arena-text)] rounded-full text-sm"
                   >
                     {skill}
                     <button
@@ -312,7 +312,7 @@ export default function SettingsPage() {
                 onKeyDown={handleAddSkill}
                 placeholder="Add a skill (press Enter)"
                 disabled={skills.length >= 10}
-                className="w-full border-2 border-[#E0DEDB] rounded-lg px-4 py-2.5 text-sm text-[#37322f] focus:outline-none focus:border-[#37322f] transition-colors disabled:opacity-50"
+                className="w-full border-2 border-[var(--arena-border)] bg-[var(--arena-bg)] rounded-lg px-4 py-2.5 text-sm text-[var(--arena-text)] placeholder:text-[var(--arena-text-faint)] focus:outline-none focus:border-[var(--arena-text)] transition-colors disabled:opacity-50"
               />
             </div>
 
@@ -320,7 +320,7 @@ export default function SettingsPage() {
             <button
               type="submit"
               disabled={saving}
-              className="w-full bg-[#37322F] text-white px-4 py-3 rounded-lg font-medium hover:bg-[#4a443f] transition-colors disabled:opacity-50 sm:hidden"
+              className="w-full bg-[var(--arena-text)] text-[var(--arena-bg)] px-4 py-3 rounded-lg font-medium hover:opacity-90 transition-colors disabled:opacity-50 sm:hidden"
             >
               {saved ? "Saved!" : saving ? "Saving..." : "Save Changes"}
             </button>

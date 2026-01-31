@@ -172,35 +172,37 @@ export function ArenaContent() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="hidden lg:block lg:w-56 flex-shrink-0"
         >
-          <div className="lg:sticky lg:top-24">
-            <h3 className="text-xs font-semibold text-[var(--arena-text-muted)] uppercase tracking-wider mb-3 px-3">
-              Categories
-            </h3>
-            <nav className="space-y-1">
-              {categories.map((cat) => (
-                <Link
-                  key={cat.slug}
-                  href={cat.slug === "all" ? "/arena" : `/arena?category=${cat.slug}`}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
-                    activeCategory === cat.slug
-                      ? "bg-[var(--arena-text)] text-[var(--arena-bg)]"
-                      : "text-[var(--arena-text-muted)] hover:bg-[var(--arena-text)]/5 hover:text-[var(--arena-text)]"
-                  }`}
-                >
-                  <span>{cat.icon}</span>
-                  {cat.label}
-                </Link>
-              ))}
-            </nav>
+          <div className="lg:sticky lg:top-24 flex flex-col justify-center min-h-[calc(100vh-12rem)]">
+            <div>
+              <h3 className="text-xs font-semibold text-[var(--arena-text-muted)] uppercase tracking-wider mb-3 px-3">
+                Categories
+              </h3>
+              <nav className="space-y-1">
+                {categories.map((cat) => (
+                  <Link
+                    key={cat.slug}
+                    href={cat.slug === "all" ? "/arena" : `/arena?category=${cat.slug}`}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
+                      activeCategory === cat.slug
+                        ? "bg-[var(--arena-text)] text-[var(--arena-bg)]"
+                        : "text-[var(--arena-text-muted)] hover:bg-[var(--arena-text)]/5 hover:text-[var(--arena-text)]"
+                    }`}
+                  >
+                    <span>{cat.icon}</span>
+                    {cat.label}
+                  </Link>
+                ))}
+              </nav>
 
-            {/* Decorative Element */}
-            <div className="mt-8 p-4 bg-[var(--arena-card)] rounded-xl border border-[var(--arena-border)]">
-              <p className="font-instrument-serif text-lg text-[var(--arena-text)] mb-2">
-                Think. Build. Do. Grow.
-              </p>
-              <p className="text-xs text-[var(--arena-text-muted)]">
-                Share your journey with fellow builders and doers.
-              </p>
+              {/* Decorative Element */}
+              <div className="mt-8 p-4 bg-[var(--arena-card)] rounded-xl border border-[var(--arena-border)]">
+                <p className="font-instrument-serif text-lg text-[var(--arena-text)] mb-2">
+                  Think. Build. Do. Grow.
+                </p>
+                <p className="text-xs text-[var(--arena-text-muted)]">
+                  Share your journey with fellow builders and doers.
+                </p>
+              </div>
             </div>
           </div>
         </motion.aside>

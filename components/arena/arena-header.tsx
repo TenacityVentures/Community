@@ -231,8 +231,8 @@ export function ArenaHeader() {
               </Link>
             </div>
 
-            {/* Center: The Arena */}
-            <div className="absolute left-1/2 -translate-x-1/2">
+            {/* Center: The Arena - Hidden on small mobile to prevent overlap */}
+            <div className="hidden sm:block absolute left-1/2 -translate-x-1/2">
               <Link
                 href="/arena"
                 className="px-4 py-1.5 text-sm font-medium text-[var(--arena-text)] hover:bg-[var(--arena-text)]/5 rounded-lg transition-colors"

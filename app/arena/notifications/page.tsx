@@ -151,14 +151,14 @@ export default function NotificationsPage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-[#f7f5f3]">
+      <div className="min-h-screen bg-[var(--arena-bg)]">
         <ArenaHeader />
         <main className="max-w-[800px] mx-auto px-4 py-8">
           <div className="animate-pulse space-y-4">
-            <div className="h-8 w-48 bg-[#E0DEDB] rounded" />
-            <div className="h-20 bg-[#E0DEDB] rounded-xl" />
-            <div className="h-20 bg-[#E0DEDB] rounded-xl" />
-            <div className="h-20 bg-[#E0DEDB] rounded-xl" />
+            <div className="h-8 w-48 bg-[var(--arena-border)] rounded" />
+            <div className="h-20 bg-[var(--arena-border)] rounded-xl" />
+            <div className="h-20 bg-[var(--arena-border)] rounded-xl" />
+            <div className="h-20 bg-[var(--arena-border)] rounded-xl" />
           </div>
         </main>
       </div>
@@ -166,7 +166,7 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f7f5f3]">
+    <div className="min-h-screen bg-[var(--arena-bg)]">
       <ArenaHeader />
 
       <main className="max-w-[800px] mx-auto px-4 py-8">
@@ -178,7 +178,7 @@ export default function NotificationsPage() {
           {/* Back Button */}
           <Link
             href="/arena"
-            className="inline-flex items-center gap-2 text-[#605A57] hover:text-[#37322f] transition-colors mb-6"
+            className="inline-flex items-center gap-2 text-[var(--arena-text-muted)] hover:text-[var(--arena-text)] transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to The Arena
@@ -187,11 +187,11 @@ export default function NotificationsPage() {
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <h1 className="font-instrument-serif text-2xl sm:text-3xl text-[#37322f]">
+              <h1 className="font-instrument-serif text-2xl sm:text-3xl text-[var(--arena-text)]">
                 Notifications
               </h1>
               {unreadCount > 0 && (
-                <span className="px-2 py-0.5 bg-red-100 text-red-600 text-xs font-medium rounded-full">
+                <span className="px-2 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-medium rounded-full">
                   {unreadCount} new
                 </span>
               )}
@@ -201,7 +201,7 @@ export default function NotificationsPage() {
               {unreadCount > 0 && (
                 <button
                   onClick={markAllAsRead}
-                  className="text-sm text-[#605A57] hover:text-[#37322f] flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-[#37322f]/5 transition-colors"
+                  className="text-sm text-[var(--arena-text-muted)] hover:text-[var(--arena-text)] flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-[var(--arena-text)]/5 transition-colors"
                 >
                   <Check className="w-4 h-4" />
                   <span className="hidden sm:inline">Mark all read</span>
@@ -210,7 +210,7 @@ export default function NotificationsPage() {
               {notifications.length > 0 && (
                 <button
                   onClick={clearAllNotifications}
-                  className="text-sm text-red-500 hover:text-red-600 flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors"
+                  className="text-sm text-red-500 hover:text-red-600 flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
                   <span className="hidden sm:inline">Clear all</span>
@@ -225,8 +225,8 @@ export default function NotificationsPage() {
               onClick={() => setFilter("all")}
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                 filter === "all"
-                  ? "bg-[#37322f] text-white"
-                  : "text-[#605A57] hover:bg-[#37322f]/5"
+                  ? "bg-[var(--arena-text)] text-[var(--arena-bg)]"
+                  : "text-[var(--arena-text-muted)] hover:bg-[var(--arena-text)]/5"
               }`}
             >
               All
@@ -235,8 +235,8 @@ export default function NotificationsPage() {
               onClick={() => setFilter("unread")}
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                 filter === "unread"
-                  ? "bg-[#37322f] text-white"
-                  : "text-[#605A57] hover:bg-[#37322f]/5"
+                  ? "bg-[var(--arena-text)] text-[var(--arena-bg)]"
+                  : "text-[var(--arena-text-muted)] hover:bg-[var(--arena-text)]/5"
               }`}
             >
               Unread
@@ -246,24 +246,24 @@ export default function NotificationsPage() {
           {/* Notifications List */}
           {loading ? (
             <div className="py-12 flex items-center justify-center">
-              <Loader2 className="w-6 h-6 animate-spin text-[#9C9894]" />
+              <Loader2 className="w-6 h-6 animate-spin text-[var(--arena-text-faint)]" />
             </div>
           ) : notifications.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-[#E0DEDB] p-12 text-center">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#f7f5f3] flex items-center justify-center">
-                <Bell className="w-8 h-8 text-[#E0DEDB]" />
+            <div className="bg-[var(--arena-card)] rounded-2xl border border-[var(--arena-border)] p-12 text-center">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[var(--arena-bg)] flex items-center justify-center">
+                <Bell className="w-8 h-8 text-[var(--arena-border)]" />
               </div>
-              <h3 className="font-instrument-serif text-xl text-[#37322f] mb-2">
+              <h3 className="font-instrument-serif text-xl text-[var(--arena-text)] mb-2">
                 {filter === "unread" ? "All caught up!" : "No notifications yet"}
               </h3>
-              <p className="text-[#605A57]">
+              <p className="text-[var(--arena-text-muted)]">
                 {filter === "unread"
                   ? "You've read all your notifications."
                   : "When someone interacts with your posts or follows you, you'll see it here."}
               </p>
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-[#E0DEDB] overflow-hidden divide-y divide-[#E0DEDB]">
+            <div className="bg-[var(--arena-card)] rounded-2xl border border-[var(--arena-border)] overflow-hidden divide-y divide-[var(--arena-border)]">
               <AnimatePresence>
                 {notifications.map((notification, index) => {
                   const Icon = notificationIcons[notification.type]
@@ -276,8 +276,8 @@ export default function NotificationsPage() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, x: -100 }}
                       transition={{ duration: 0.2, delay: index * 0.02 }}
-                      className={`flex items-start gap-4 p-4 hover:bg-[#f7f5f3] transition-colors relative group ${
-                        !notification.read ? "bg-blue-50/30" : ""
+                      className={`flex items-start gap-4 p-4 hover:bg-[var(--arena-bg)] transition-colors relative group ${
+                        !notification.read ? "bg-blue-500/10" : ""
                       }`}
                     >
                       {/* Unread indicator */}
@@ -288,7 +288,7 @@ export default function NotificationsPage() {
                       {/* Actor Avatar */}
                       <Link
                         href={`/arena/profile/${notification.actor.username}`}
-                        className="w-10 h-10 rounded-full bg-[#37322f] text-white flex items-center justify-center text-sm font-medium overflow-hidden flex-shrink-0"
+                        className="w-10 h-10 rounded-full bg-[var(--arena-text)] text-[var(--arena-bg)] flex items-center justify-center text-sm font-medium overflow-hidden flex-shrink-0"
                       >
                         {notification.actor.avatar_url ? (
                           <img
@@ -318,23 +318,23 @@ export default function NotificationsPage() {
                           }}
                           className="block"
                         >
-                          <p className="text-[#37322f]">
+                          <p className="text-[var(--arena-text)]">
                             <span className="font-medium hover:underline">
                               {notification.actor.full_name || notification.actor.username}
                             </span>{" "}
                             {message}
                           </p>
                           {notification.post && (
-                            <p className="text-sm text-[#605A57] mt-0.5 truncate">
+                            <p className="text-sm text-[var(--arena-text-muted)] mt-0.5 truncate">
                               "{notification.post.title}"
                             </p>
                           )}
                           {notification.comment && (
-                            <p className="text-sm text-[#605A57] mt-1 line-clamp-2 bg-[#f7f5f3] rounded-lg p-2">
+                            <p className="text-sm text-[var(--arena-text-muted)] mt-1 line-clamp-2 bg-[var(--arena-bg)] rounded-lg p-2">
                               {notification.comment.content}
                             </p>
                           )}
-                          <p className="text-xs text-[#9C9894] mt-1">
+                          <p className="text-xs text-[var(--arena-text-faint)] mt-1">
                             {formatDistanceToNow(new Date(notification.created_at), {
                               addSuffix: true,
                             })}
@@ -344,14 +344,14 @@ export default function NotificationsPage() {
 
                       {/* Icon */}
                       <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                        notification.type === "follow" ? "bg-blue-100" :
-                        notification.type === "reaction" ? "bg-red-100" :
-                        "bg-[#f7f5f3]"
+                        notification.type === "follow" ? "bg-blue-100 dark:bg-blue-900/30" :
+                        notification.type === "reaction" ? "bg-red-100 dark:bg-red-900/30" :
+                        "bg-[var(--arena-bg)]"
                       }`}>
                         <Icon className={`w-4 h-4 ${
                           notification.type === "follow" ? "text-blue-500" :
                           notification.type === "reaction" ? "text-red-500" :
-                          "text-[#605A57]"
+                          "text-[var(--arena-text-muted)]"
                         }`} />
                       </div>
 
@@ -360,18 +360,18 @@ export default function NotificationsPage() {
                         {!notification.read && (
                           <button
                             onClick={() => markAsRead(notification.id)}
-                            className="p-1.5 hover:bg-white rounded-lg transition-colors"
+                            className="p-1.5 hover:bg-[var(--arena-card)] rounded-lg transition-colors"
                             title="Mark as read"
                           >
-                            <Check className="w-4 h-4 text-[#605A57]" />
+                            <Check className="w-4 h-4 text-[var(--arena-text-muted)]" />
                           </button>
                         )}
                         <button
                           onClick={() => deleteNotification(notification.id)}
-                          className="p-1.5 hover:bg-white rounded-lg transition-colors"
+                          className="p-1.5 hover:bg-[var(--arena-card)] rounded-lg transition-colors"
                           title="Delete"
                         >
-                          <Trash2 className="w-4 h-4 text-[#9C9894] hover:text-red-500" />
+                          <Trash2 className="w-4 h-4 text-[var(--arena-text-faint)] hover:text-red-500" />
                         </button>
                       </div>
                     </motion.div>

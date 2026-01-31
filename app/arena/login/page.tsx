@@ -54,17 +54,17 @@ export default function LoginPage() {
   const isDisabled = loading || oauthLoading !== null
 
   return (
-    <div className="min-h-screen bg-[#f7f5f3] flex flex-col">
+    <div className="min-h-screen bg-[var(--arena-bg)] flex flex-col">
       {/* Header */}
-      <header className="w-full border-b border-[#37322f]/6">
+      <header className="w-full border-b border-[var(--arena-border)]">
         <div className="max-w-[1060px] mx-auto px-4">
           <nav className="flex items-center justify-between py-4">
-            <Link href="/" className="text-[#37322f] font-semibold text-lg">
+            <Link href="/" className="text-[var(--arena-text)] font-semibold text-lg">
               Tenacity
             </Link>
             <Link
               href="/arena"
-              className="text-[#37322f] hover:text-[#37322f]/80 text-sm font-medium"
+              className="text-[var(--arena-text)] hover:text-[var(--arena-text-muted)] text-sm font-medium"
             >
               Back to Arena
             </Link>
@@ -82,15 +82,15 @@ export default function LoginPage() {
         >
           {/* Decorative lines */}
           <div className="relative">
-            <div className="absolute -left-4 top-0 bottom-0 w-px bg-[#37322f]/10" />
-            <div className="absolute -right-4 top-0 bottom-0 w-px bg-[#37322f]/10" />
+            <div className="absolute -left-4 top-0 bottom-0 w-px bg-[var(--arena-text)]/10" />
+            <div className="absolute -right-4 top-0 bottom-0 w-px bg-[var(--arena-text)]/10" />
 
-            <div className="bg-white rounded-2xl shadow-lg border border-[#37322f]/5 p-8 sm:p-10">
+            <div className="bg-[var(--arena-card)] rounded-2xl shadow-lg border border-[var(--arena-border)] p-8 sm:p-10">
               <div className="text-center mb-8">
-                <h1 className="font-instrument-serif text-3xl sm:text-4xl text-[#37322f] mb-2">
+                <h1 className="font-instrument-serif text-3xl sm:text-4xl text-[var(--arena-text)] mb-2">
                   Enter The Arena
                 </h1>
-                <p className="text-[#605A57] text-sm">
+                <p className="text-[var(--arena-text-muted)] text-sm">
                   Join the community of builders, thinkers, and doers.
                 </p>
               </div>
@@ -100,7 +100,7 @@ export default function LoginPage() {
                 <button
                   onClick={() => handleOAuthLogin('google')}
                   disabled={isDisabled}
-                  className="w-full flex items-center justify-center gap-3 border-2 border-[#E0DEDB] rounded-lg px-4 py-3 text-[#37322f] font-medium hover:border-[#37322f] hover:bg-[#f7f5f3] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex items-center justify-center gap-3 border-2 border-[var(--arena-border)] rounded-lg px-4 py-3 text-[var(--arena-text)] font-medium hover:border-[var(--arena-text)] hover:bg-[var(--arena-bg)] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {oauthLoading === 'google' ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
@@ -118,7 +118,7 @@ export default function LoginPage() {
                 <button
                   onClick={() => handleOAuthLogin('github')}
                   disabled={isDisabled}
-                  className="w-full flex items-center justify-center gap-3 border-2 border-[#E0DEDB] rounded-lg px-4 py-3 text-[#37322f] font-medium hover:border-[#37322f] hover:bg-[#f7f5f3] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex items-center justify-center gap-3 border-2 border-[var(--arena-border)] rounded-lg px-4 py-3 text-[var(--arena-text)] font-medium hover:border-[var(--arena-text)] hover:bg-[var(--arena-bg)] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {oauthLoading === 'github' ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
@@ -134,10 +134,10 @@ export default function LoginPage() {
               {/* Divider */}
               <div className="relative mb-6">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-[#E0DEDB]" />
+                  <div className="w-full border-t border-[var(--arena-border)]" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="bg-white px-4 text-[#605A57]">or continue with email</span>
+                  <span className="bg-[var(--arena-card)] px-4 text-[var(--arena-text-muted)]">or continue with email</span>
                 </div>
               </div>
 
@@ -149,13 +149,13 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={isDisabled}
-                  className="w-full border-2 border-[#E0DEDB] rounded-lg px-4 py-3 focus:outline-none focus:border-[#37322f] text-[#37322f] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full border-2 border-[var(--arena-border)] bg-[var(--arena-bg)] rounded-lg px-4 py-3 focus:outline-none focus:border-[var(--arena-text)] text-[var(--arena-text)] placeholder:text-[var(--arena-text-faint)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   required
                 />
                 <button
                   type="submit"
                   disabled={isDisabled || !email}
-                  className="w-full bg-[#37322F] text-white rounded-lg px-4 py-3 font-medium hover:bg-[#4a443f] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full bg-[var(--arena-text)] text-[var(--arena-bg)] rounded-lg px-4 py-3 font-medium hover:opacity-90 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                   {loading ? "Sending..." : "Send Magic Link"}
@@ -171,8 +171,8 @@ export default function LoginPage() {
                     exit={{ opacity: 0, y: -10 }}
                     className={`mt-4 p-3 rounded-lg text-sm text-center ${
                       message.type === 'success'
-                        ? 'bg-green-50 text-green-700 border border-green-200'
-                        : 'bg-red-50 text-red-700 border border-red-200'
+                        ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800'
+                        : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800'
                     }`}
                   >
                     {message.text}
@@ -181,10 +181,10 @@ export default function LoginPage() {
               </AnimatePresence>
 
               {/* Footer */}
-              <p className="mt-6 text-center text-xs text-[#605A57]">
+              <p className="mt-6 text-center text-xs text-[var(--arena-text-muted)]">
                 By continuing, you agree to join a community that values
                 <br />
-                <span className="font-medium text-[#37322f]">courage, creativity, and execution.</span>
+                <span className="font-medium text-[var(--arena-text)]">courage, creativity, and execution.</span>
               </p>
             </div>
           </div>

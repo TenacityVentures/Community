@@ -125,8 +125,8 @@ export default function NewPostPage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-[#f7f5f3] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[#37322f] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-[var(--arena-bg)] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[var(--arena-text)] border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
@@ -136,14 +136,14 @@ export default function NewPostPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f7f5f3]">
+    <div className="min-h-screen bg-[var(--arena-bg)]">
       {/* Header */}
-      <header className="w-full border-b border-[#37322f]/6 bg-[#f7f5f3] sticky top-0 z-40">
+      <header className="w-full border-b border-[var(--arena-border)] bg-[var(--arena-bg)] sticky top-0 z-40">
         <div className="max-w-[800px] mx-auto px-4">
           <nav className="flex items-center justify-between py-4">
             <Link
               href="/arena"
-              className="flex items-center gap-2 text-[#605A57] hover:text-[#37322f] transition-colors"
+              className="flex items-center gap-2 text-[var(--arena-text-muted)] hover:text-[var(--arena-text)] transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to Arena
@@ -151,7 +151,7 @@ export default function NewPostPage() {
             <button
               onClick={handleSubmit}
               disabled={submitting || !title.trim() || !category}
-              className="bg-[#37322F] text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-[#4a443f] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-[var(--arena-text)] text-[var(--arena-bg)] px-5 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitting ? "Publishing..." : "Publish"}
             </button>
@@ -172,7 +172,7 @@ export default function NewPostPage() {
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm"
+                className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg text-sm"
               >
                 {error}
               </motion.div>
@@ -185,17 +185,17 @@ export default function NewPostPage() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Your post title..."
-                className="w-full text-3xl sm:text-4xl font-instrument-serif text-[#37322f] bg-transparent border-none focus:outline-none placeholder:text-[#605A57]/50"
+                className="w-full text-3xl sm:text-4xl font-instrument-serif text-[var(--arena-text)] bg-transparent border-none focus:outline-none placeholder:text-[var(--arena-text-muted)]/50"
                 maxLength={150}
               />
-              <p className="text-xs text-[#605A57] mt-2">
+              <p className="text-xs text-[var(--arena-text-muted)] mt-2">
                 {title.length}/150 characters
               </p>
             </div>
 
             {/* Category Selection */}
             <div>
-              <label className="block text-sm font-medium text-[#37322f] mb-3">
+              <label className="block text-sm font-medium text-[var(--arena-text)] mb-3">
                 Category
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
@@ -206,12 +206,12 @@ export default function NewPostPage() {
                     onClick={() => setCategory(cat.value)}
                     className={`flex flex-col items-center p-3 rounded-xl border-2 transition-all duration-200 ${
                       category === cat.value
-                        ? "border-[#37322f] bg-[#37322f]/5"
-                        : "border-[#E0DEDB] hover:border-[#37322f]/30"
+                        ? "border-[var(--arena-text)] bg-[var(--arena-text)]/5"
+                        : "border-[var(--arena-border)] hover:border-[var(--arena-text)]/30"
                     }`}
                   >
                     <span className="text-xl mb-1">{cat.icon}</span>
-                    <span className="text-sm font-medium text-[#37322f]">{cat.label}</span>
+                    <span className="text-sm font-medium text-[var(--arena-text)]">{cat.label}</span>
                   </button>
                 ))}
               </div>
@@ -219,14 +219,14 @@ export default function NewPostPage() {
 
             {/* Tags */}
             <div>
-              <label className="block text-sm font-medium text-[#37322f] mb-2">
-                Tags <span className="text-[#605A57] font-normal">(optional, max 5)</span>
+              <label className="block text-sm font-medium text-[var(--arena-text)] mb-2">
+                Tags <span className="text-[var(--arena-text-muted)] font-normal">(optional, max 5)</span>
               </label>
               <div className="flex flex-wrap gap-2 mb-2">
                 {tags.map((tag) => (
                   <span
                     key={tag}
-                    className="inline-flex items-center gap-1 px-3 py-1 bg-[#37322f]/10 text-[#37322f] rounded-full text-sm"
+                    className="inline-flex items-center gap-1 px-3 py-1 bg-[var(--arena-text)]/10 text-[var(--arena-text)] rounded-full text-sm"
                   >
                     #{tag}
                     <button
@@ -246,13 +246,13 @@ export default function NewPostPage() {
                 onKeyDown={handleAddTag}
                 placeholder="Add tags (press Enter)"
                 disabled={tags.length >= 5}
-                className="w-full border-2 border-[#E0DEDB] rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-[#37322f] text-[#37322f] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full border-2 border-[var(--arena-border)] bg-[var(--arena-bg)] rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-[var(--arena-text)] text-[var(--arena-text)] placeholder:text-[var(--arena-text-faint)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
 
             {/* Rich Text Editor */}
             <div>
-              <label className="block text-sm font-medium text-[#37322f] mb-2">
+              <label className="block text-sm font-medium text-[var(--arena-text)] mb-2">
                 Content
               </label>
               <RichTextEditor
@@ -267,7 +267,7 @@ export default function NewPostPage() {
               <button
                 type="submit"
                 disabled={submitting || !title.trim() || !category}
-                className="w-full bg-[#37322F] text-white px-5 py-3 rounded-lg font-medium hover:bg-[#4a443f] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-[var(--arena-text)] text-[var(--arena-bg)] px-5 py-3 rounded-lg font-medium hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {submitting ? "Publishing..." : "Publish Post"}
               </button>
