@@ -25,16 +25,16 @@ import {
   Heart,
   Trash2,
   Pencil,
-  Check,
   Loader2,
   Reply,
-  X,
   ChevronDown,
   ChevronUp,
+  Check,
+  CornerDownRight,
 } from "lucide-react"
 import type { PostWithAuthor, CommentWithAuthor, PostCategory, ReactionType, Reaction, CommentWithReplies } from "@/lib/supabase/types"
 
-const COMMENTS_PER_PAGE = 10
+const COMMENTS_PER_PAGE = 5
 
 const categoryStyles: Record<PostCategory, { bg: string; text: string; icon: string }> = {
   building: { bg: "bg-amber-50", text: "text-amber-700", icon: "🛠️" },
@@ -57,12 +57,10 @@ function buildCommentTree(comments: CommentWithAuthor[]): CommentWithReplies[] {
   const commentMap = new Map<string, CommentWithReplies>()
   const roots: CommentWithReplies[] = []
 
-  // First pass: create all nodes
   comments.forEach(comment => {
     commentMap.set(comment.id, { ...comment, replies: [] })
   })
 
-  // Second pass: build tree
   comments.forEach(comment => {
     const node = commentMap.get(comment.id)!
     if (comment.parent_id) {
@@ -81,7 +79,7 @@ function buildCommentTree(comments: CommentWithAuthor[]): CommentWithReplies[] {
   return roots
 }
 
-// Comment component with threading
+// Minimal, slick comment component
 function CommentItem({
   comment,
   postId,
@@ -103,7 +101,7 @@ function CommentItem({
   onReply: (parentId: string, content: string) => Promise<void>
   depth?: number
 }) {
-  const [showMenu, setShowMenu] = useState(false)
+  const [showActions, setShowActions] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [editContent, setEditContent] = useState(comment.content)
   const [isReplying, setIsReplying] = useState(false)
@@ -111,21 +109,10 @@ function CommentItem({
   const [submitting, setSubmitting] = useState(false)
   const [showReplies, setShowReplies] = useState(depth < 2)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const menuRef = useRef<HTMLDivElement>(null)
 
   const isAuthor = user?.id === comment.author_id
   const hasReplies = comment.replies && comment.replies.length > 0
   const maxDepth = 3
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setShowMenu(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
 
   const handleEdit = async () => {
     if (!editContent.trim()) return
@@ -145,247 +132,217 @@ function CommentItem({
     setShowReplies(true)
   }
 
-  const handleDelete = () => {
-    onDelete(comment.id)
-    setShowDeleteConfirm(false)
-  }
-
   return (
-    <div className={`${depth > 0 ? 'ml-6 sm:ml-10 border-l-2 border-[#E0DEDB] pl-4' : ''}`}>
+    <div className={`group ${depth > 0 ? 'ml-8 pl-4 border-l border-[#E0DEDB]/60' : ''}`}>
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex gap-3"
+        transition={{ duration: 0.2 }}
+        className="relative"
+        onMouseEnter={() => setShowActions(true)}
+        onMouseLeave={() => !isEditing && setShowActions(false)}
       >
-        <Link href={`/arena/profile/${comment.author.username}`} className="flex-shrink-0">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#37322f] text-white flex items-center justify-center text-xs sm:text-sm font-medium overflow-hidden">
-            {comment.author.avatar_url ? (
-              <img
-                src={comment.author.avatar_url}
-                alt={comment.author.full_name || comment.author.username}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              (comment.author.full_name?.[0] || comment.author.username[0]).toUpperCase()
-            )}
-          </div>
-        </Link>
-
-        <div className="flex-1 min-w-0">
-          <div className="bg-white rounded-xl border border-[#E0DEDB] p-3 sm:p-4">
-            <div className="flex items-start justify-between gap-2 mb-2">
-              <div className="min-w-0">
-                <Link
-                  href={`/arena/profile/${comment.author.username}`}
-                  className="font-medium text-[#37322f] hover:text-[#605A57] transition-colors text-sm"
-                >
-                  {comment.author.full_name || comment.author.username}
-                </Link>
-                <span className="text-xs text-[#605A57] ml-2">
-                  {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
-                  {comment.updated_at !== comment.created_at && (
-                    <span className="ml-1 text-[#605A57]/60">(edited)</span>
-                  )}
-                </span>
-              </div>
-
-              {isAuthor && (
-                <div className="relative" ref={menuRef}>
-                  <button
-                    onClick={() => setShowMenu(!showMenu)}
-                    className="p-1 text-[#605A57] hover:text-[#37322f] rounded transition-colors"
-                  >
-                    <MoreHorizontal className="w-4 h-4" />
-                  </button>
-
-                  <AnimatePresence>
-                    {showMenu && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-[#E0DEDB] py-1 min-w-[120px] z-10"
-                      >
-                        <button
-                          onClick={() => { setIsEditing(true); setShowMenu(false) }}
-                          className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-[#37322f] hover:bg-[#f7f5f3]"
-                        >
-                          <Pencil className="w-3.5 h-3.5" />
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => { setShowDeleteConfirm(true); setShowMenu(false) }}
-                          className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                          Delete
-                        </button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
+        {/* Comment header */}
+        <div className="flex items-center gap-2 mb-1.5">
+          <Link href={`/arena/profile/${comment.author.username}`} className="flex-shrink-0">
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#37322f] to-[#5a524d] text-white flex items-center justify-center text-[10px] font-medium overflow-hidden ring-2 ring-white">
+              {comment.author.avatar_url ? (
+                <img src={comment.author.avatar_url} alt="" className="w-full h-full object-cover" />
+              ) : (
+                (comment.author.full_name?.[0] || comment.author.username[0]).toUpperCase()
               )}
             </div>
-
-            {isEditing ? (
-              <div className="space-y-2">
-                <textarea
-                  value={editContent}
-                  onChange={(e) => setEditContent(e.target.value)}
-                  className="w-full border border-[#E0DEDB] rounded-lg px-3 py-2 text-sm text-[#37322f] focus:outline-none focus:border-[#37322f] resize-none"
-                  rows={3}
-                />
-                <div className="flex gap-2 justify-end">
-                  <button
-                    onClick={() => { setIsEditing(false); setEditContent(comment.content) }}
-                    className="px-3 py-1.5 text-sm text-[#605A57] hover:text-[#37322f]"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleEdit}
-                    disabled={submitting || !editContent.trim()}
-                    className="px-3 py-1.5 text-sm bg-[#37322f] text-white rounded-lg hover:bg-[#4a443f] disabled:opacity-50 flex items-center gap-1"
-                  >
-                    {submitting && <Loader2 className="w-3 h-3 animate-spin" />}
-                    Save
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <p className="text-[#37322f] text-sm whitespace-pre-wrap break-words">{comment.content}</p>
-            )}
-          </div>
-
-          {/* Actions */}
-          {!isEditing && (
-            <div className="flex items-center gap-3 mt-2 ml-1">
-              {user && depth < maxDepth && (
-                <button
-                  onClick={() => setIsReplying(!isReplying)}
-                  className="flex items-center gap-1 text-xs text-[#605A57] hover:text-[#37322f] transition-colors"
-                >
-                  <Reply className="w-3.5 h-3.5" />
-                  Reply
-                </button>
-              )}
-              {hasReplies && (
-                <button
-                  onClick={() => setShowReplies(!showReplies)}
-                  className="flex items-center gap-1 text-xs text-[#605A57] hover:text-[#37322f] transition-colors"
-                >
-                  {showReplies ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                  {comment.replies?.length} {comment.replies?.length === 1 ? 'reply' : 'replies'}
-                </button>
-              )}
-            </div>
+          </Link>
+          <Link
+            href={`/arena/profile/${comment.author.username}`}
+            className="text-sm font-medium text-[#37322f] hover:underline"
+          >
+            {comment.author.full_name || comment.author.username}
+          </Link>
+          <span className="text-xs text-[#9C9894]">·</span>
+          <span className="text-xs text-[#9C9894]">
+            {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
+          </span>
+          {comment.updated_at !== comment.created_at && (
+            <span className="text-[10px] text-[#9C9894] italic">(edited)</span>
           )}
+        </div>
 
-          {/* Reply Form */}
-          <AnimatePresence>
-            {isReplying && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="mt-3 overflow-hidden"
+        {/* Comment content */}
+        {isEditing ? (
+          <div className="ml-8 space-y-2">
+            <textarea
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              className="w-full bg-[#f7f5f3] border-0 rounded-lg px-3 py-2 text-sm text-[#37322f] focus:outline-none focus:ring-2 focus:ring-[#37322f]/20 resize-none transition-all"
+              rows={2}
+              autoFocus
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={() => { setIsEditing(false); setEditContent(comment.content) }}
+                className="px-3 py-1 text-xs text-[#605A57] hover:text-[#37322f] transition-colors"
               >
-                <div className="flex gap-2">
-                  <div className="w-6 h-6 rounded-full bg-[#37322f] text-white flex items-center justify-center text-xs font-medium overflow-hidden flex-shrink-0">
-                    {profile?.avatar_url ? (
-                      <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      (profile?.full_name?.[0] || profile?.username?.[0] || "U").toUpperCase()
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <textarea
-                      value={replyContent}
-                      onChange={(e) => setReplyContent(e.target.value)}
-                      placeholder={`Reply to ${comment.author.full_name || comment.author.username}...`}
-                      className="w-full border border-[#E0DEDB] rounded-lg px-3 py-2 text-sm text-[#37322f] focus:outline-none focus:border-[#37322f] resize-none"
-                      rows={2}
-                    />
-                    <div className="flex gap-2 justify-end mt-2">
-                      <button
-                        onClick={() => { setIsReplying(false); setReplyContent("") }}
-                        className="px-3 py-1.5 text-xs text-[#605A57] hover:text-[#37322f]"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={handleReply}
-                        disabled={submitting || !replyContent.trim()}
-                        className="px-3 py-1.5 text-xs bg-[#37322f] text-white rounded-lg hover:bg-[#4a443f] disabled:opacity-50 flex items-center gap-1"
-                      >
-                        {submitting && <Loader2 className="w-3 h-3 animate-spin" />}
-                        Reply
-                      </button>
-                    </div>
+                Cancel
+              </button>
+              <button
+                onClick={handleEdit}
+                disabled={submitting || !editContent.trim()}
+                className="px-3 py-1 text-xs bg-[#37322f] text-white rounded-md hover:bg-[#4a443f] disabled:opacity-50 flex items-center gap-1 transition-colors"
+              >
+                {submitting && <Loader2 className="w-3 h-3 animate-spin" />}
+                Save
+              </button>
+            </div>
+          </div>
+        ) : (
+          <p className="ml-8 text-[#37322f] text-sm leading-relaxed whitespace-pre-wrap break-words">
+            {comment.content}
+          </p>
+        )}
+
+        {/* Actions - appear on hover */}
+        {!isEditing && (
+          <div className={`ml-8 mt-1.5 flex items-center gap-3 transition-opacity duration-150 ${showActions || isReplying ? 'opacity-100' : 'opacity-0'}`}>
+            {user && depth < maxDepth && (
+              <button
+                onClick={() => setIsReplying(!isReplying)}
+                className="flex items-center gap-1 text-xs text-[#9C9894] hover:text-[#37322f] transition-colors"
+              >
+                <Reply className="w-3 h-3" />
+                Reply
+              </button>
+            )}
+            {isAuthor && (
+              <>
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="flex items-center gap-1 text-xs text-[#9C9894] hover:text-[#37322f] transition-colors"
+                >
+                  <Pencil className="w-3 h-3" />
+                  Edit
+                </button>
+                <button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="flex items-center gap-1 text-xs text-[#9C9894] hover:text-red-500 transition-colors"
+                >
+                  <Trash2 className="w-3 h-3" />
+                  Delete
+                </button>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Reply count toggle */}
+        {hasReplies && (
+          <button
+            onClick={() => setShowReplies(!showReplies)}
+            className="ml-8 mt-2 flex items-center gap-1 text-xs text-[#605A57] hover:text-[#37322f] transition-colors"
+          >
+            {showReplies ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            <span>{comment.replies?.length} {comment.replies?.length === 1 ? 'reply' : 'replies'}</span>
+          </button>
+        )}
+
+        {/* Reply form */}
+        <AnimatePresence>
+          {isReplying && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="ml-8 mt-3 overflow-hidden"
+            >
+              <div className="flex gap-2 items-start">
+                <CornerDownRight className="w-4 h-4 text-[#9C9894] mt-2 flex-shrink-0" />
+                <div className="flex-1">
+                  <textarea
+                    value={replyContent}
+                    onChange={(e) => setReplyContent(e.target.value)}
+                    placeholder={`Reply to ${comment.author.full_name || comment.author.username}...`}
+                    className="w-full bg-[#f7f5f3] border-0 rounded-lg px-3 py-2 text-sm text-[#37322f] focus:outline-none focus:ring-2 focus:ring-[#37322f]/20 resize-none placeholder:text-[#9C9894] transition-all"
+                    rows={2}
+                    autoFocus
+                  />
+                  <div className="flex gap-2 mt-2">
+                    <button
+                      onClick={() => { setIsReplying(false); setReplyContent("") }}
+                      className="px-3 py-1 text-xs text-[#605A57] hover:text-[#37322f] transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleReply}
+                      disabled={submitting || !replyContent.trim()}
+                      className="px-3 py-1 text-xs bg-[#37322f] text-white rounded-md hover:bg-[#4a443f] disabled:opacity-50 flex items-center gap-1 transition-colors"
+                    >
+                      {submitting && <Loader2 className="w-3 h-3 animate-spin" />}
+                      Reply
+                    </button>
                   </div>
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-          {/* Nested Replies */}
-          <AnimatePresence>
-            {showReplies && hasReplies && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="mt-4 space-y-4"
-              >
-                {comment.replies?.map(reply => (
-                  <CommentItem
-                    key={reply.id}
-                    comment={reply}
-                    postId={postId}
-                    user={user}
-                    profile={profile}
-                    supabase={supabase}
-                    onDelete={onDelete}
-                    onUpdate={onUpdate}
-                    onReply={onReply}
-                    depth={depth + 1}
-                  />
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+        {/* Nested replies */}
+        <AnimatePresence>
+          {showReplies && hasReplies && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="mt-4 space-y-4"
+            >
+              {comment.replies?.map(reply => (
+                <CommentItem
+                  key={reply.id}
+                  comment={reply}
+                  postId={postId}
+                  user={user}
+                  profile={profile}
+                  supabase={supabase}
+                  onDelete={onDelete}
+                  onUpdate={onUpdate}
+                  onReply={onReply}
+                  depth={depth + 1}
+                />
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
 
-      {/* Delete Confirmation */}
+      {/* Delete confirmation - minimal modal */}
       <AnimatePresence>
         {showDeleteConfirm && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
             onClick={() => setShowDeleteConfirm(false)}
           >
             <motion.div
-              initial={{ scale: 0.95 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.95 }}
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-xl p-5 max-w-sm w-full shadow-xl"
+              className="bg-white rounded-xl p-5 max-w-xs w-full shadow-2xl"
             >
-              <h3 className="font-medium text-[#37322f] mb-2">Delete comment?</h3>
-              <p className="text-sm text-[#605A57] mb-4">This action cannot be undone.</p>
+              <p className="text-sm text-[#37322f] mb-4">Delete this comment?</p>
               <div className="flex gap-2 justify-end">
                 <button
                   onClick={() => setShowDeleteConfirm(false)}
-                  className="px-4 py-2 text-sm text-[#605A57] hover:text-[#37322f]"
+                  className="px-4 py-2 text-sm text-[#605A57] hover:text-[#37322f] transition-colors"
                 >
                   Cancel
                 </button>
                 <button
-                  onClick={handleDelete}
-                  className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700"
+                  onClick={() => { onDelete(comment.id); setShowDeleteConfirm(false) }}
+                  className="px-4 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
                 >
                   Delete
                 </button>
@@ -422,13 +379,13 @@ export default function PostPage() {
   const [hasMoreComments, setHasMoreComments] = useState(false)
   const [loadingMoreComments, setLoadingMoreComments] = useState(false)
   const [totalComments, setTotalComments] = useState(0)
+  const [rootCommentCount, setRootCommentCount] = useState(0)
 
   const postMenuRef = useRef<HTMLDivElement>(null)
   const reactionsRef = useRef<HTMLDivElement>(null)
 
   const isAuthor = user?.id === post?.author_id
 
-  // Click outside handlers
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (postMenuRef.current && !postMenuRef.current.contains(event.target as Node)) {
@@ -466,15 +423,57 @@ export default function PostPage() {
   const fetchComments = useCallback(async (postId: string, page: number, append = false) => {
     if (append) setLoadingMoreComments(true)
 
-    const { data, count } = await (supabase.from("comments") as any)
-      .select(`*, author:profiles!comments_author_id_fkey(*)`, { count: 'exact' })
-      .eq("post_id", postId)
-      .order("created_at", { ascending: true })
+    // Fetch root comments with pagination
+    const from = (page - 1) * COMMENTS_PER_PAGE
+    const to = from + COMMENTS_PER_PAGE - 1
 
-    if (data) {
-      setComments(data as CommentWithAuthor[])
-      setTotalComments(count || 0)
+    // First get total count of root comments
+    const { count: rootCount } = await (supabase.from("comments") as any)
+      .select("id", { count: 'exact', head: true })
+      .eq("post_id", postId)
+      .is("parent_id", null)
+
+    setRootCommentCount(rootCount || 0)
+
+    // Get paginated root comments
+    const { data: rootComments } = await (supabase.from("comments") as any)
+      .select(`*, author:profiles!comments_author_id_fkey(*)`)
+      .eq("post_id", postId)
+      .is("parent_id", null)
+      .order("created_at", { ascending: false })
+      .range(from, to)
+
+    if (rootComments && rootComments.length > 0) {
+      // Get all replies for these root comments
+      const rootIds = rootComments.map((c: any) => c.id)
+      const { data: replies } = await (supabase.from("comments") as any)
+        .select(`*, author:profiles!comments_author_id_fkey(*)`)
+        .eq("post_id", postId)
+        .in("parent_id", rootIds)
+        .order("created_at", { ascending: true })
+
+      const allComments = [...rootComments, ...(replies || [])]
+
+      if (append) {
+        setComments(prev => {
+          const existingIds = new Set(prev.map(c => c.id))
+          const newComments = allComments.filter((c: any) => !existingIds.has(c.id))
+          return [...prev, ...newComments]
+        })
+      } else {
+        setComments(allComments as CommentWithAuthor[])
+      }
+    } else if (!append) {
+      setComments([])
     }
+
+    // Get total comment count
+    const { count: total } = await (supabase.from("comments") as any)
+      .select("id", { count: 'exact', head: true })
+      .eq("post_id", postId)
+
+    setTotalComments(total || 0)
+    setHasMoreComments((rootCount || 0) > page * COMMENTS_PER_PAGE)
     setLoadingMoreComments(false)
   }, [supabase])
 
@@ -493,7 +492,6 @@ export default function PostPage() {
 
       setPost(postData as PostWithAuthor)
 
-      // Increment view count
       await (supabase.from("posts") as any)
         .update({ view_count: (postData.view_count || 0) + 1 })
         .eq("id", postData.id)
@@ -517,12 +515,15 @@ export default function PostPage() {
     }
   }, [user, reactions])
 
+  const loadMoreComments = () => {
+    const nextPage = commentsPage + 1
+    setCommentsPage(nextPage)
+    if (post) fetchComments(post.id, nextPage, true)
+  }
+
   const handleReaction = async (type: ReactionType) => {
     if (!user || !post) return
     setShowReactions(false)
-
-    const previousReaction = userReaction
-    const previousReactions = [...reactions]
 
     if (userReaction === type) {
       setUserReaction(null)
@@ -530,7 +531,7 @@ export default function PostPage() {
       await (supabase.from("reactions") as any).delete().eq("user_id", user.id).eq("post_id", post.id)
     } else {
       setUserReaction(type)
-      if (previousReaction) {
+      if (userReaction) {
         setReactions(reactions.map(r => r.user_id === user.id ? { ...r, type } : r))
         await (supabase.from("reactions") as any).update({ type }).eq("user_id", user.id).eq("post_id", post.id)
       } else {
@@ -568,9 +569,10 @@ export default function PostPage() {
       .single()
 
     if (!error && data) {
-      setComments([...comments, data as CommentWithAuthor])
+      setComments(prev => [data as CommentWithAuthor, ...prev])
       setNewComment("")
       setTotalComments(prev => prev + 1)
+      setRootCommentCount(prev => prev + 1)
     }
     setSubmittingComment(false)
   }
@@ -583,20 +585,23 @@ export default function PostPage() {
       .single()
 
     if (!error && data) {
-      setComments([...comments, data as CommentWithAuthor])
+      setComments(prev => [...prev, data as CommentWithAuthor])
       setTotalComments(prev => prev + 1)
     }
   }
 
   const handleDeleteComment = async (commentId: string) => {
-    // Delete all replies first
     const repliesToDelete = comments.filter(c => c.parent_id === commentId)
+    const isRoot = !comments.find(c => c.id === commentId)?.parent_id
+
     for (const reply of repliesToDelete) {
       await (supabase.from("comments") as any).delete().eq("id", reply.id)
     }
     await (supabase.from("comments") as any).delete().eq("id", commentId)
+
     setComments(comments.filter(c => c.id !== commentId && c.parent_id !== commentId))
     setTotalComments(prev => prev - 1 - repliesToDelete.length)
+    if (isRoot) setRootCommentCount(prev => prev - 1)
   }
 
   const handleUpdateComment = async (commentId: string, content: string) => {
@@ -645,10 +650,15 @@ export default function PostPage() {
         <ArenaHeader />
         <main className="max-w-[800px] mx-auto px-4 py-8">
           <div className="animate-pulse space-y-4">
-            <div className="h-8 w-48 bg-[#E0DEDB] rounded" />
-            <div className="h-12 w-3/4 bg-[#E0DEDB] rounded" />
-            <div className="h-4 w-full bg-[#E0DEDB] rounded" />
-            <div className="h-4 w-2/3 bg-[#E0DEDB] rounded" />
+            <div className="h-6 w-32 bg-[#E0DEDB] rounded" />
+            <div className="h-10 w-3/4 bg-[#E0DEDB] rounded" />
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-[#E0DEDB] rounded-full" />
+              <div className="space-y-2">
+                <div className="h-4 w-24 bg-[#E0DEDB] rounded" />
+                <div className="h-3 w-32 bg-[#E0DEDB] rounded" />
+              </div>
+            </div>
           </div>
         </main>
       </div>
@@ -678,30 +688,30 @@ export default function PostPage() {
       <ArenaHeader />
 
       <main className="max-w-[800px] mx-auto px-4 py-8">
-        <motion.article initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <Link href="/arena" className="inline-flex items-center gap-2 text-[#605A57] hover:text-[#37322f] transition-colors mb-6">
-            <ArrowLeft className="w-4 h-4" />Back to The Arena
+        <motion.article initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+          <Link href="/arena" className="inline-flex items-center gap-2 text-[#9C9894] hover:text-[#37322f] transition-colors mb-6 text-sm">
+            <ArrowLeft className="w-4 h-4" />Back
           </Link>
 
           <header className="mb-8">
             <div className="flex items-start justify-between mb-4">
-              <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${category.bg} ${category.text}`}>
+              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${category.bg} ${category.text}`}>
                 {category.icon} {post.category}
               </span>
 
               {isAuthor && (
                 <div className="relative" ref={postMenuRef}>
-                  <button onClick={() => setShowPostMenu(!showPostMenu)} className="p-2 text-[#605A57] hover:text-[#37322f] hover:bg-[#E0DEDB] rounded-lg transition-colors">
+                  <button onClick={() => setShowPostMenu(!showPostMenu)} className="p-1.5 text-[#9C9894] hover:text-[#37322f] hover:bg-[#E0DEDB]/50 rounded-lg transition-colors">
                     <MoreHorizontal className="w-5 h-5" />
                   </button>
                   <AnimatePresence>
                     {showPostMenu && (
-                      <motion.div initial={{ opacity: 0, y: -10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -10, scale: 0.95 }} className="absolute right-0 top-full mt-1 bg-white rounded-xl shadow-lg border border-[#E0DEDB] py-1 min-w-[160px] z-10">
-                        <Link href={`/arena/edit/${post.slug}`} className="flex items-center gap-2 px-4 py-2 text-[#37322f] hover:bg-[#f7f5f3]" onClick={() => setShowPostMenu(false)}>
-                          <Pencil className="w-4 h-4" />Edit Post
+                      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-[#E0DEDB]/60 py-1 min-w-[140px] z-10">
+                        <Link href={`/arena/edit/${post.slug}`} className="flex items-center gap-2 px-3 py-2 text-sm text-[#37322f] hover:bg-[#f7f5f3] transition-colors" onClick={() => setShowPostMenu(false)}>
+                          <Pencil className="w-4 h-4 text-[#9C9894]" />Edit
                         </Link>
-                        <button onClick={() => { setShowPostMenu(false); setShowDeleteConfirm(true) }} className="w-full flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50">
-                          <Trash2 className="w-4 h-4" />Delete Post
+                        <button onClick={() => { setShowPostMenu(false); setShowDeleteConfirm(true) }} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                          <Trash2 className="w-4 h-4" />Delete
                         </button>
                       </motion.div>
                     )}
@@ -710,11 +720,11 @@ export default function PostPage() {
               )}
             </div>
 
-            <h1 className="font-instrument-serif text-3xl sm:text-4xl text-[#37322f] mb-4">{post.title}</h1>
+            <h1 className="font-instrument-serif text-3xl sm:text-4xl text-[#37322f] mb-6 leading-tight">{post.title}</h1>
 
             <div className="flex items-center gap-3">
               <Link href={`/arena/profile/${post.author.username}`}>
-                <div className="w-12 h-12 rounded-full bg-[#37322f] text-white flex items-center justify-center text-lg font-medium overflow-hidden">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#37322f] to-[#5a524d] text-white flex items-center justify-center text-sm font-medium overflow-hidden ring-2 ring-white shadow-sm">
                   {post.author.avatar_url ? (
                     <img src={post.author.avatar_url} alt={post.author.full_name || post.author.username} className="w-full h-full object-cover" />
                   ) : (
@@ -723,41 +733,40 @@ export default function PostPage() {
                 </div>
               </Link>
               <div>
-                <Link href={`/arena/profile/${post.author.username}`} className="font-medium text-[#37322f] hover:text-[#605A57] transition-colors">
+                <Link href={`/arena/profile/${post.author.username}`} className="font-medium text-[#37322f] hover:underline text-sm">
                   {post.author.full_name || post.author.username}
                 </Link>
-                <p className="text-sm text-[#605A57]">@{post.author.username} · {timeAgo}</p>
+                <p className="text-xs text-[#9C9894]">{timeAgo}</p>
               </div>
             </div>
           </header>
 
           {post.tags && post.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-6">
+            <div className="flex flex-wrap gap-1.5 mb-6">
               {post.tags.map((tag) => (
-                <span key={tag} className="px-3 py-1 bg-[#37322f]/5 text-[#605A57] text-sm rounded-full">#{tag}</span>
+                <span key={tag} className="px-2 py-0.5 bg-[#37322f]/5 text-[#605A57] text-xs rounded-md">#{tag}</span>
               ))}
             </div>
           )}
 
-          <div className="bg-white rounded-2xl border border-[#E0DEDB] p-6 sm:p-8 mb-6">
+          <div className="bg-white rounded-2xl border border-[#E0DEDB]/60 p-6 sm:p-8 mb-6 shadow-sm">
             <PostContent content={post.content} />
           </div>
 
           {/* Actions Bar */}
-          <div className="flex items-center justify-between py-4 border-y border-[#E0DEDB] mb-8">
-            <div className="flex items-center gap-4">
+          <div className="flex items-center justify-between py-4 border-y border-[#E0DEDB]/60 mb-8">
+            <div className="flex items-center gap-5">
               <div className="relative" ref={reactionsRef}>
-                <button onClick={() => user ? setShowReactions(!showReactions) : router.push('/arena/login')} className={`flex items-center gap-2 transition-colors ${userReaction ? reactionConfig[userReaction].color : "text-[#605A57] hover:text-[#37322f]"}`}>
+                <button onClick={() => user ? setShowReactions(!showReactions) : router.push('/arena/login')} className={`flex items-center gap-1.5 transition-colors ${userReaction ? reactionConfig[userReaction].color : "text-[#9C9894] hover:text-[#37322f]"}`}>
                   {userReaction ? reactionConfig[userReaction].icon : <Dumbbell className="w-5 h-5" />}
-                  <span className="text-sm">{totalReactions > 0 ? totalReactions : "React"}</span>
+                  <span className="text-sm font-medium">{totalReactions > 0 ? totalReactions : ""}</span>
                 </button>
                 <AnimatePresence>
                   {showReactions && (
-                    <motion.div initial={{ opacity: 0, y: 10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.95 }} className="absolute bottom-full left-0 mb-2 bg-white rounded-xl shadow-lg border border-[#E0DEDB] p-2 flex gap-1 z-10">
+                    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }} className="absolute bottom-full left-0 mb-2 bg-white rounded-xl shadow-lg border border-[#E0DEDB]/60 p-1.5 flex gap-0.5 z-10">
                       {(Object.entries(reactionConfig) as [ReactionType, typeof reactionConfig[ReactionType]][]).map(([type, config]) => (
-                        <button key={type} title={config.label} onClick={() => handleReaction(type)} className={`p-2 rounded-lg transition-all ${userReaction === type ? `${config.color} bg-[#f7f5f3] scale-110` : "hover:bg-[#f7f5f3] text-[#605A57]"}`}>
+                        <button key={type} title={config.label} onClick={() => handleReaction(type)} className={`p-2 rounded-lg transition-all ${userReaction === type ? `${config.color} bg-[#f7f5f3]` : "hover:bg-[#f7f5f3] text-[#9C9894] hover:scale-110"}`}>
                           {config.icon}
-                          {reactionCounts[type] > 0 && <span className="text-xs ml-1">{reactionCounts[type]}</span>}
                         </button>
                       ))}
                     </motion.div>
@@ -765,30 +774,20 @@ export default function PostPage() {
                 </AnimatePresence>
               </div>
 
-              {totalReactions > 0 && (
-                <div className="flex items-center -space-x-1">
-                  {Object.entries(reactionCounts).sort(([, a], [, b]) => b - a).slice(0, 3).map(([type]) => (
-                    <span key={type} className={`w-6 h-6 rounded-full bg-white border border-[#E0DEDB] flex items-center justify-center ${reactionConfig[type as ReactionType].color}`}>
-                      {reactionConfig[type as ReactionType].icon}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              <span className="flex items-center gap-2 text-[#605A57]">
-                <MessageCircle className="w-5 h-5" /><span className="text-sm">{totalComments}</span>
+              <span className="flex items-center gap-1.5 text-[#9C9894]">
+                <MessageCircle className="w-5 h-5" /><span className="text-sm font-medium">{totalComments}</span>
               </span>
 
-              <span className="flex items-center gap-2 text-[#605A57]">
-                <Eye className="w-5 h-5" /><span className="text-sm">{post.view_count}</span>
+              <span className="flex items-center gap-1.5 text-[#9C9894]">
+                <Eye className="w-5 h-5" /><span className="text-sm font-medium">{post.view_count}</span>
               </span>
             </div>
 
-            <div className="flex items-center gap-2">
-              <button onClick={handleShare} className="p-2 text-[#605A57] hover:text-[#37322f] hover:bg-[#f7f5f3] rounded-lg transition-colors">
+            <div className="flex items-center gap-1">
+              <button onClick={handleShare} className="p-2 text-[#9C9894] hover:text-[#37322f] hover:bg-[#f7f5f3] rounded-lg transition-colors">
                 {copied ? <Check className="w-5 h-5 text-green-600" /> : <Share2 className="w-5 h-5" />}
               </button>
-              <button onClick={handleBookmark} className={`p-2 rounded-lg transition-colors ${isBookmarked ? 'text-[#37322f] bg-[#37322f]/10' : 'text-[#605A57] hover:text-[#37322f] hover:bg-[#f7f5f3]'}`}>
+              <button onClick={handleBookmark} className={`p-2 rounded-lg transition-colors ${isBookmarked ? 'text-[#37322f] bg-[#37322f]/10' : 'text-[#9C9894] hover:text-[#37322f] hover:bg-[#f7f5f3]'}`}>
                 {isBookmarked ? <BookmarkCheck className="w-5 h-5" /> : <Bookmark className="w-5 h-5" />}
               </button>
             </div>
@@ -796,20 +795,26 @@ export default function PostPage() {
 
           {/* Comments Section */}
           <section>
-            <h2 className="font-instrument-serif text-2xl text-[#37322f] mb-6">Discussion ({totalComments})</h2>
+            <h2 className="text-lg font-medium text-[#37322f] mb-6">Discussion</h2>
 
             {user ? (
               <form onSubmit={handleSubmitComment} className="mb-8">
                 <div className="flex gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#37322f] text-white flex items-center justify-center text-sm font-medium overflow-hidden flex-shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#37322f] to-[#5a524d] text-white flex items-center justify-center text-xs font-medium overflow-hidden ring-2 ring-white flex-shrink-0">
                     {profile?.avatar_url ? (
-                      <img src={profile.avatar_url} alt={profile.full_name || profile.username} className="w-full h-full object-cover" />
+                      <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
                     ) : (
                       (profile?.full_name?.[0] || profile?.username?.[0] || "U").toUpperCase()
                     )}
                   </div>
                   <div className="flex-1">
-                    <textarea value={newComment} onChange={(e) => setNewComment(e.target.value)} placeholder="Join the discussion..." rows={3} className="w-full border-2 border-[#E0DEDB] rounded-xl px-4 py-3 text-[#37322f] focus:outline-none focus:border-[#37322f] transition-colors resize-none" />
+                    <textarea
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      placeholder="Share your thoughts..."
+                      rows={3}
+                      className="w-full bg-white border border-[#E0DEDB]/60 rounded-xl px-4 py-3 text-sm text-[#37322f] focus:outline-none focus:border-[#37322f]/30 transition-colors resize-none placeholder:text-[#9C9894]"
+                    />
                     <div className="flex justify-end mt-2">
                       <button type="submit" disabled={submittingComment || !newComment.trim()} className="flex items-center gap-2 bg-[#37322F] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#4a443f] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                         {submittingComment ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
@@ -820,8 +825,8 @@ export default function PostPage() {
                 </div>
               </form>
             ) : (
-              <div className="bg-[#f7f5f3] rounded-xl p-6 text-center mb-8">
-                <p className="text-[#605A57] mb-3">Join the conversation</p>
+              <div className="bg-white rounded-xl border border-[#E0DEDB]/60 p-6 text-center mb-8">
+                <p className="text-sm text-[#605A57] mb-3">Join the conversation</p>
                 <Link href="/arena/login" className="inline-flex items-center gap-2 bg-[#37322F] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#4a443f] transition-colors">
                   Enter The Arena
                 </Link>
@@ -829,9 +834,9 @@ export default function PostPage() {
             )}
 
             {commentTree.length === 0 ? (
-              <div className="text-center py-8 text-[#605A57]">
-                <MessageCircle className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                <p>No comments yet. Be the first to share your thoughts!</p>
+              <div className="text-center py-12 text-[#9C9894]">
+                <MessageCircle className="w-10 h-10 mx-auto mb-3 opacity-40" />
+                <p className="text-sm">No comments yet. Start the discussion!</p>
               </div>
             ) : (
               <div className="space-y-6">
@@ -848,6 +853,29 @@ export default function PostPage() {
                     onReply={handleReplyToComment}
                   />
                 ))}
+
+                {/* Load more comments */}
+                {hasMoreComments && (
+                  <div className="text-center pt-4">
+                    <button
+                      onClick={loadMoreComments}
+                      disabled={loadingMoreComments}
+                      className="inline-flex items-center gap-2 px-4 py-2 text-sm text-[#605A57] hover:text-[#37322f] transition-colors disabled:opacity-50"
+                    >
+                      {loadingMoreComments ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Loading...
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDown className="w-4 h-4" />
+                          Load more comments ({rootCommentCount - commentsPage * COMMENTS_PER_PAGE} remaining)
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </section>
@@ -857,24 +885,16 @@ export default function PostPage() {
       {/* Delete Post Confirmation */}
       <AnimatePresence>
         {showDeleteConfirm && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => !deleting && setShowDeleteConfirm(false)}>
-            <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} onClick={(e) => e.stopPropagation()} className="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-                  <Trash2 className="w-6 h-6 text-red-600" />
-                </div>
-                <div>
-                  <h3 className="font-instrument-serif text-xl text-[#37322f]">Delete Post?</h3>
-                  <p className="text-sm text-[#605A57]">This action cannot be undone.</p>
-                </div>
-              </div>
-              <p className="text-[#605A57] mb-6">Are you sure you want to delete "{post.title}"?</p>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => !deleting && setShowDeleteConfirm(false)}>
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} onClick={(e) => e.stopPropagation()} className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl">
+              <h3 className="font-medium text-[#37322f] text-lg mb-2">Delete this post?</h3>
+              <p className="text-sm text-[#605A57] mb-6">This will permanently remove "{post.title}" and all its comments.</p>
               <div className="flex gap-3">
-                <button onClick={() => setShowDeleteConfirm(false)} disabled={deleting} className="flex-1 px-4 py-2 border-2 border-[#E0DEDB] rounded-lg text-[#37322f] font-medium hover:bg-[#f7f5f3] disabled:opacity-50">
+                <button onClick={() => setShowDeleteConfirm(false)} disabled={deleting} className="flex-1 px-4 py-2.5 text-sm text-[#37322f] hover:bg-[#f7f5f3] rounded-lg transition-colors disabled:opacity-50">
                   Cancel
                 </button>
-                <button onClick={handleDeletePost} disabled={deleting} className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 disabled:opacity-50 flex items-center justify-center gap-2">
-                  {deleting ? <><Loader2 className="w-4 h-4 animate-spin" />Deleting...</> : "Delete Post"}
+                <button onClick={handleDeletePost} disabled={deleting} className="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600 disabled:opacity-50 flex items-center justify-center gap-2 transition-colors">
+                  {deleting ? <><Loader2 className="w-4 h-4 animate-spin" />Deleting...</> : "Delete"}
                 </button>
               </div>
             </motion.div>
