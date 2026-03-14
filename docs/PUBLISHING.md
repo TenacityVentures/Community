@@ -213,9 +213,10 @@ export { Callout } from './Callout'
 
 ### Step 3 — Register it
 
-Add to the `mdxComponents` object in `app/log/[slug]/page.tsx`:
+Add to the `mdxComponents` object in `app/[slug]/page.tsx`:
 
 ```tsx
+// app/[slug]/page.tsx
 import { PostImage, CaptionImage, LayoutImage, Callout } from '@/components/mdx'
 
 const mdxComponents = {
@@ -253,16 +254,16 @@ components/
     index.ts                      ← barrel export
 
 app/
-  log/
-    layout.tsx                    ← shared header/nav for log
-    page.tsx                      ← post list at /log
-    [slug]/
-      page.tsx                    ← post detail + MDX renderer
+  layout.tsx                      ← shared header/nav for all pages
+  page.tsx                        ← post list (homepage)
+  [slug]/
+    page.tsx                      ← post detail + MDX renderer
 
 lib/
   posts.ts                        ← reads/parses MDX files
 
-PUBLISHING.md                     ← this file
+docs/
+  PUBLISHING.md                   ← this file
 ```
 
 ---
@@ -272,19 +273,18 @@ PUBLISHING.md                     ← this file
 | File | What it does |
 |---|---|
 | `lib/posts.ts` | Reads all `.mdx` files, parses frontmatter, filters published, sorts by date |
-| `app/log/page.tsx` | Post list page — shows all published posts |
-| `app/log/[slug]/page.tsx` | Post detail page — renders MDX, passes components |
+| `app/page.tsx` | Post list page — shows all published posts |
+| `app/[slug]/page.tsx` | Post detail page — renders MDX, passes components |
 | `components/mdx/index.ts` | Register new MDX components here |
 | `app/globals.css` | `.prose-log` styles control how body text renders in posts |
 
 ---
 
-## Subdomain Setup (Vercel)
+## Deployment (Vercel)
 
-To route `log.10na.city` to this section:
+This app deploys as its own Vercel project from the `feature/log` branch:
 
-1. Vercel dashboard → Project → Settings → Domains
-2. Add `log.10na.city`
-3. Follow the DNS instructions (add CNAME record)
-
-The rewrite rule in `next.config.mjs` handles routing the subdomain to `/log` automatically.
+1. Vercel dashboard → New Project → import same GitHub repo
+2. Set **Branch** to `feature/log`
+3. Settings → Domains → add `log.10na.city`
+4. Follow DNS instructions (CNAME to `cname.vercel-dns.com`)
