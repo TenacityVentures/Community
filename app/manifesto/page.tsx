@@ -25,10 +25,10 @@ export default function Manifesto() {
       description: "Question everything. Challenge assumptions. See problems as opportunities waiting to be unlocked.",
       icon: (
         <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M20 8C13.373 8 8 13.373 8 20C8 26.627 13.373 32 20 32C26.627 32 32 26.627 32 20C32 13.373 26.627 8 20 8Z" stroke="#37322F" strokeWidth="2" fill="none"/>
-          <circle cx="16" cy="18" r="1.5" fill="#37322F"/>
-          <circle cx="24" cy="18" r="1.5" fill="#37322F"/>
-          <path d="M15 25C15 25 17 27 20 27C23 27 25 25 25 25" stroke="#37322F" strokeWidth="2" strokeLinecap="round"/>
+          <path d="M20 8C13.373 8 8 13.373 8 20C8 26.627 13.373 32 20 32C26.627 32 32 26.627 32 20C32 13.373 26.627 8 20 8Z" stroke="#37322F" strokeWidth="2" fill="none" />
+          <circle cx="16" cy="18" r="1.5" fill="#37322F" />
+          <circle cx="24" cy="18" r="1.5" fill="#37322F" />
+          <path d="M15 25C15 25 17 27 20 27C23 27 25 25 25 25" stroke="#37322F" strokeWidth="2" strokeLinecap="round" />
         </svg>
       )
     },
@@ -37,12 +37,12 @@ export default function Manifesto() {
       description: "Turn ideas into reality. Create solutions that matter. Make things that move the world forward.",
       icon: (
         <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="10" y="16" width="8" height="16" stroke="#37322F" strokeWidth="2" fill="none"/>
-          <rect x="22" y="10" width="8" height="22" stroke="#37322F" strokeWidth="2" fill="none"/>
-          <rect x="12" y="20" width="2" height="2" fill="#37322F"/>
-          <rect x="15" y="20" width="2" height="2" fill="#37322F"/>
-          <rect x="24" y="14" width="2" height="2" fill="#37322F"/>
-          <rect x="27" y="14" width="2" height="2" fill="#37322F"/>
+          <rect x="10" y="16" width="8" height="16" stroke="#37322F" strokeWidth="2" fill="none" />
+          <rect x="22" y="10" width="8" height="22" stroke="#37322F" strokeWidth="2" fill="none" />
+          <rect x="12" y="20" width="2" height="2" fill="#37322F" />
+          <rect x="15" y="20" width="2" height="2" fill="#37322F" />
+          <rect x="24" y="14" width="2" height="2" fill="#37322F" />
+          <rect x="27" y="14" width="2" height="2" fill="#37322F" />
         </svg>
       )
     },
@@ -51,8 +51,8 @@ export default function Manifesto() {
       description: "Execution is everything. Take action. Ship fast, learn faster, and iterate relentlessly.",
       icon: (
         <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 20L18 26L28 14" stroke="#37322F" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-          <circle cx="20" cy="20" r="12" stroke="#37322F" strokeWidth="2" fill="none"/>
+          <path d="M12 20L18 26L28 14" stroke="#37322F" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          <circle cx="20" cy="20" r="12" stroke="#37322F" strokeWidth="2" fill="none" />
         </svg>
       )
     },
@@ -61,8 +61,8 @@ export default function Manifesto() {
       description: "Never stop learning. Embrace failure as feedback. Evolve constantly, personally and professionally.",
       icon: (
         <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M10 28L15 22L20 25L25 18L30 12" stroke="#37322F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-          <path d="M26 12H30V16" stroke="#37322F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M10 28L15 22L20 25L25 18L30 12" stroke="#37322F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          <path d="M26 12H30V16" stroke="#37322F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       )
     }
@@ -117,14 +117,15 @@ export default function Manifesto() {
               className="relative pb-16 flex flex-col justify-center items-center w-full mt-12 md:mt-0"
             >
               <div className="text-center max-w-3xl px-4">
-                <Badge
+                {/*<Badge
                   icon={
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M7 1L9 5L13 5.5L10 8.5L10.5 13L7 11L3.5 13L4 8.5L1 5.5L5 5L7 1Z" stroke="#37322F" strokeWidth="1" fill="none"/>
                     </svg>
                   }
                   text="Our Manifesto"
-                />
+                />*/}
+                <div className='nice-line w-1/2 h-[2px] bg-[#37322F] mx-auto'></div>
                 <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-normal text-[#37322F] leading-tight mt-6 mb-6">
                   This is for the builders who refuse to wait.
                 </h1>
@@ -167,10 +168,10 @@ export default function Manifesto() {
                   <Badge
                     icon={
                       <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="1" y="1" width="5" height="5" stroke="#37322F" strokeWidth="1" fill="none"/>
-                        <rect x="8" y="1" width="5" height="5" stroke="#37322F" strokeWidth="1" fill="none"/>
-                        <rect x="1" y="8" width="5" height="5" stroke="#37322F" strokeWidth="1" fill="none"/>
-                        <rect x="8" y="8" width="5" height="5" stroke="#37322F" strokeWidth="1" fill="none"/>
+                        <rect x="1" y="1" width="5" height="5" stroke="#37322F" strokeWidth="1" fill="none" />
+                        <rect x="8" y="1" width="5" height="5" stroke="#37322F" strokeWidth="1" fill="none" />
+                        <rect x="1" y="8" width="5" height="5" stroke="#37322F" strokeWidth="1" fill="none" />
+                        <rect x="8" y="8" width="5" height="5" stroke="#37322F" strokeWidth="1" fill="none" />
                       </svg>
                     }
                     text="Four Pillars"
@@ -215,7 +216,7 @@ export default function Manifesto() {
                   <Badge
                     icon={
                       <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M7 2L7 12M2 7L12 7" stroke="#37322F" strokeWidth="1.5" strokeLinecap="round"/>
+                        <path d="M7 2L7 12M2 7L12 7" stroke="#37322F" strokeWidth="1.5" strokeLinecap="round" />
                       </svg>
                     }
                     text="Core Beliefs"
@@ -262,10 +263,10 @@ export default function Manifesto() {
                 <Badge
                   icon={
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <circle cx="4" cy="4" r="2" stroke="#37322F" strokeWidth="1" fill="none"/>
-                      <circle cx="10" cy="4" r="2" stroke="#37322F" strokeWidth="1" fill="none"/>
-                      <circle cx="7" cy="10" r="2" stroke="#37322F" strokeWidth="1" fill="none"/>
-                      <path d="M5.5 5L5.5 9M8.5 5L8.5 9" stroke="#37322F" strokeWidth="1"/>
+                      <circle cx="4" cy="4" r="2" stroke="#37322F" strokeWidth="1" fill="none" />
+                      <circle cx="10" cy="4" r="2" stroke="#37322F" strokeWidth="1" fill="none" />
+                      <circle cx="7" cy="10" r="2" stroke="#37322F" strokeWidth="1" fill="none" />
+                      <path d="M5.5 5L5.5 9M8.5 5L8.5 9" stroke="#37322F" strokeWidth="1" />
                     </svg>
                   }
                   text="Join Us"
