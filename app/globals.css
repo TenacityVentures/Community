@@ -135,3 +135,85 @@
 .scrollbar-none::-webkit-scrollbar {
   display: none;
 }
+
+/* MDX prose styles for log posts */
+.prose-log {
+  color: #37322f;
+  font-family: var(--font-serif), serif;
+  font-size: 1.125rem;
+  line-height: 1.75;
+}
+.prose-log p {
+  margin-bottom: 1.5rem;
+}
+.prose-log h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  color: #37322f;
+}
+.prose-log h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  color: #37322f;
+}
+.prose-log ul,
+.prose-log ol {
+  margin-bottom: 1.5rem;
+  padding-left: 1.5rem;
+}
+.prose-log li {
+  margin-bottom: 0.5rem;
+}
+.prose-log ul li {
+  list-style-type: disc;
+}
+.prose-log ol li {
+  list-style-type: decimal;
+}
+.prose-log strong {
+  font-weight: 600;
+  color: #37322f;
+}
+.prose-log a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  color: #37322f;
+}
+.prose-log a:hover {
+  opacity: 0.6;
+}
+.prose-log blockquote {
+  border-left: 2px solid #37322f40;
+  padding-left: 1.25rem;
+  margin: 1.5rem 0;
+  color: #37322f99;
+  font-style: italic;
+}
+.prose-log code {
+  background: #37322f12;
+  border-radius: 3px;
+  padding: 0.15em 0.35em;
+  font-size: 0.9em;
+  font-family: ui-monospace, monospace;
+}
+.prose-log pre {
+  background: #37322f0a;
+  border: 1px solid #37322f15;
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  margin-bottom: 1.5rem;
+}
+.prose-log pre code {
+  background: none;
+  padding: 0;
+}
+.prose-log hr {
+  border: none;
+  border-top: 1px solid #37322f15;
+  margin: 2.5rem 0;
+}
