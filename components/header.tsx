@@ -1,10 +1,19 @@
+'use client'
+
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 
+const NAV_ITEMS = [
+  { href: '/ventures', label: 'Ventures' },
+  { href: '/services', label: 'Services' },
+  { href: '/manifesto', label: 'Manifesto' },
+]
 
 export function Header() {
+  const pathname = usePathname()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [step, setStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -64,20 +73,91 @@ export function Header() {
       <div className="max-w-[1060px] mx-auto px-4">
         <nav className="flex items-center justify-between py-4">
           <div className="flex items-center space-x-8">
-            <Link href={'/'} className="text-[#37322f] font-semibold text-lg cursor-pointer">Tenacity</Link>
+            {/* Logo — first to drop */}
+            <motion.div
+              initial={{ opacity: 0, y: -28 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, delay: 0.70, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <Link href={'/'} className="text-[#37322f] font-semibold text-lg cursor-pointer">Tenacity</Link>
+            </motion.div>
+
+            {/* Desktop nav links — each drops in after the logo, 80ms apart */}
             <div className="hidden md:flex items-center space-x-6">
-              <Link href={'/ventures'} className="cursor-pointer"><button className="text-[#37322f] hover:text-[#37322f]/80 text-sm font-medium cursor-pointer">Ventures</button></Link>
-              <Link href={'/services'} className="cursor-pointer"><button className="text-[#37322f] hover:text-[#37322f]/80 text-sm font-medium cursor-pointer">Services</button></Link>
-              <Link href={'/manifesto'} className="cursor-pointer"><button className="text-[#37322f] hover:text-[#37322f]/80 text-sm font-medium cursor-pointer">Manifesto</button></Link>
+              {NAV_ITEMS.map((item, i) => {
+                const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href))
+                return (
+                  <motion.div
+                    key={item.href}
+                    initial={{ opacity: 0, y: -28 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.45, delay: 0.78 + i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                  >
+                    <Link href={item.href} className="relative py-1 group block">
+                      <span
+                        className="text-sm font-medium transition-colors duration-200"
+                        style={{ color: isActive ? '#37322f' : 'rgba(55,50,47,0.45)' }}
+                      >
+                        {item.label}
+                      </span>
+                      {/* Hover ghost underline */}
+                      <span className="absolute -bottom-0.5 left-0 right-0 h-px bg-[#37322f]/20 scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left" />
+                      {/* Active sliding underline */}
+                      {isActive && (
+                        <motion.span
+                          layoutId="nav-underline"
+                          className="absolute -bottom-0.5 left-0 right-0 h-px bg-[#37322f]"
+                          transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                        />
+                      )}
+                    </Link>
+                  </motion.div>
+                )
+              })}
             </div>
           </div>
-          <Button variant="ghost" className="text-[#37322f] cursor-pointer hover:bg-[#37322f]/5" 
-          onClick={() => {
-          setIsModalOpen(true)}}>
-            Join the movement
-          </Button>
+
+          {/* CTA — last to drop, completing the sequence */}
+          <motion.div
+            initial={{ opacity: 0, y: -28 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 1.02, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <Button variant="ghost" className="text-[#37322f] cursor-pointer hover:bg-[#37322f]/5"
+              onClick={() => setIsModalOpen(true)}>
+              Join the movement
+            </Button>
+          </motion.div>
         </nav>
       </div>
+
+      {/* Mobile nav strip — drops in last, after "Join the movement" */}
+      <motion.div
+        initial={{ opacity: 0, y: -16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, delay: 1.10, ease: [0.22, 1, 0.36, 1] }}
+        className="md:hidden border-t border-[#37322f]/6 overflow-x-auto scrollbar-none"
+      >
+        <div className="flex items-center gap-2 py-2.5 px-4">
+          {NAV_ITEMS.map((item) => {
+            const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href))
+            return (
+              <Link key={item.href} href={item.href}>
+                <motion.span
+                  className="inline-flex px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors duration-200"
+                  animate={{
+                    backgroundColor: isActive ? '#37322f' : 'transparent',
+                    color: isActive ? '#f7f5f3' : 'rgba(55,50,47,0.5)',
+                  }}
+                  transition={{ duration: 0.25 }}
+                >
+                  {item.label}
+                </motion.span>
+              </Link>
+            )
+          })}
+        </div>
+      </motion.div>
 
       {/* Modal */}
       <AnimatePresence>
