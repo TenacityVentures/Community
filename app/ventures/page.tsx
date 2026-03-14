@@ -3,6 +3,11 @@
 import FooterSection from "@/components/footer-section"
 import { Header } from "@/components/header"
 import { HeroSection } from "@/components/ventures/hero-section"
+import { VenturesShowcase } from "@/components/ventures/ventures-showcase"
+import { HowWeBuild } from "@/components/ventures/how-we-build"
+import { VentureOpportunities } from "@/components/ventures/venture-opportunities"
+import CTASection from "@/components/cta-section"
+import FAQSection from "@/components/faq-section"
 
 export default function Ventures() {
   return (
@@ -19,6 +24,16 @@ export default function Ventures() {
           <Header />
           <div className="pt-12 sm:pt-16 md:pt-20 lg:pt-[116px] pb-8 sm:pb-12 md:pb-16 flex flex-col justify-start items-center px-2 sm:px-4 md:px-8 lg:px-0 w-full sm:pl-0 sm:pr-0 pl-0 pr-0">
             <HeroSection />
+
+            <VenturesShowcase />
+
+            <HowWeBuild />
+
+            <VentureOpportunities />
+
+            <FAQSection />
+
+            <CTASection />
 
             <FooterSection />
           </div>

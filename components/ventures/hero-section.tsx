@@ -101,7 +101,7 @@ export function HeroSection() {
         className="text-center max-w-2xl"
       >
         <h1 className="text-4xl sm:text-6xl md:text-7xl font-serif font-normal text-[#37322F] leading-tight mb-4">
-          <MagneticText>Hold tight, we're</MagneticText>{" "}
+          <MagneticText>We build</MagneticText>{" "}
           <motion.span
             drag
             dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
@@ -110,12 +110,12 @@ export function HeroSection() {
             className="bg-[#37322f]/5 p-2 rounded-md inline-block cursor-grab active:cursor-grabbing"
             whileDrag={{ scale: 1.05 }}
           >
-            developing
+            ventures
           </motion.span>{" "}
-          <MagneticText>something cool here.</MagneticText>
+          <MagneticText>that matter.</MagneticText>
         </h1>
         <p className="text-[#605A57] text-sm sm:text-base md:text-lg mb-6">
-          For now, join the movement of founders and builders creating Africa's future.
+          From zero to launch, we create ventures that solve real problems and drive meaningful impact across Africa.
         </p>
 
         <button
