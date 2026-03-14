@@ -30,7 +30,7 @@ export default function Services() {
         <div className="w-full">
           <ServicesShowcase />
           <ApproachSection />
-          <StatsSection />
+          {/*<StatsSection />*/}
           <ServicesCTA />
 
           {/* Footer Section */}

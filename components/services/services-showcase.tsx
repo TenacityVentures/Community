@@ -24,20 +24,20 @@ const services: Service[] = [
     ),
   },
   {
-    title: "Brand & Narrative",
-    description: "Stories that move markets. Build a brand that people believe in and talk about.",
-    features: ["Brand Identity", "Content Strategy", "Visual Design", "Messaging"],
+    title: "Digital Brand Transformation",
+    description: "Your brand is your first impression in every market. We craft digital-first identities built to travel — distinctive, coherent, and impossible to ignore.",
+    features: ["Brand Identity", "Digital Presence", "Visual Design", "Messaging Architecture", "Content Strategy"],
     icon: (
       <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
         <circle cx="16" cy="16" r="10" stroke="currentColor" strokeWidth="2" fill="none" />
-        <path d="M11 16 L14 19 L21 12" stroke="currentColor" strokeWidth="2" fill="none" />
+        <path d="M10 16 L14 20 L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
       </svg>
     ),
   },
   {
     title: "Product & Engineering",
     description: "Technology that scales. Build products that users love and that grow with your vision.",
-    features: ["Product Design", "Engineering", "Infrastructure", "Technical Strategy"],
+    features: ["Product Design", "Engineering", "Infrastructure", "Technical Strategy", "AI Automation"],
     icon: (
       <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect x="8" y="8" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" />
@@ -47,13 +47,13 @@ const services: Service[] = [
     ),
   },
   {
-    title: "Growth & Scale",
-    description: "From traction to dominance. Scale with strategies that work in emerging markets.",
-    features: ["Growth Strategy", "Performance Marketing", "Analytics", "Optimization"],
+    title: "WhatsApp Business Agent",
+    description: "Turn the world's most-used messaging app into your most powerful revenue channel. We build intelligent WhatsApp agents that qualify leads, close deals, and serve customers — around the clock.",
+    features: ["Conversational AI", "Lead Qualification", "CRM Integration", "Automated Support", "Campaign Flows"],
     icon: (
       <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <polyline points="6,24 12,18 18,20 26,8" stroke="currentColor" strokeWidth="2" fill="none" />
-        <polyline points="20,8 26,8 26,14" stroke="currentColor" strokeWidth="2" fill="none" />
+        <path d="M16 5C9.925 5 5 9.925 5 16c0 2.1.583 4.063 1.594 5.738L5 27l5.438-1.563A10.944 10.944 0 0016 27c6.075 0 11-4.925 11-11S22.075 5 16 5z" stroke="currentColor" strokeWidth="2" fill="none" strokeLinejoin="round" />
+        <path d="M12 13.5c.5 1 1.5 3 3.5 4.5s3.5 1.5 4 1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none" />
       </svg>
     ),
   },
