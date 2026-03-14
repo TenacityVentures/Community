@@ -100,30 +100,51 @@ export function HeroSection() {
         }}
         className="text-center max-w-2xl"
       >
-        <h1 className="text-4xl sm:text-6xl md:text-7xl font-serif font-normal text-[#37322F] leading-tight mb-4">
-          <MagneticText>We build</MagneticText>{" "}
-          <motion.span
-            drag
-            dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-            dragElastic={0.7}
-            dragTransition={{ bounceStiffness: 600, bounceDamping: 20 }}
-            className="bg-[#37322f]/5 p-2 rounded-md inline-block cursor-grab active:cursor-grabbing"
-            whileDrag={{ scale: 1.05 }}
-          >
-            ventures
-          </motion.span>{" "}
-          <MagneticText>that matter.</MagneticText>
-        </h1>
-        <p className="text-[#605A57] text-sm sm:text-base md:text-lg mb-6">
-          From zero to launch, we create ventures that solve real problems and drive meaningful impact across Africa.
-        </p>
-
-        <button
-          className="relative bg-[#37322F] text-white px-8 py-3 rounded-full font-medium hover:bg-[#4a443f] transition-all duration-300"
-          onClick={() => setIsModalOpen(true)}
+        {/* H1 block slams up from below as one unit */}
+        <motion.div
+          initial={{ opacity: 0, y: 64 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 1.20, ease: [0.22, 1, 0.36, 1] }}
         >
-          Join for free
-        </button>
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-serif font-normal text-[#37322F] leading-tight mb-4">
+            <MagneticText>We build</MagneticText>{" "}
+            <motion.span
+              drag
+              dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+              dragElastic={0.7}
+              dragTransition={{ bounceStiffness: 600, bounceDamping: 20 }}
+              className="bg-[#37322f]/5 p-2 rounded-md inline-block cursor-grab active:cursor-grabbing"
+              whileDrag={{ scale: 1.05 }}
+            >
+              ventures
+            </motion.span>{" "}
+            <MagneticText>that matter.</MagneticText>
+          </h1>
+        </motion.div>
+
+        {/* Subtitle follows with a slight delay */}
+        <motion.p
+          className="text-[#605A57] text-sm sm:text-base md:text-lg mb-6"
+          initial={{ opacity: 0, y: 32 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 1.52, ease: [0.22, 1, 0.36, 1] }}
+        >
+          From zero to launch, we create ventures that solve real problems and drive meaningful impact across Africa.
+        </motion.p>
+
+        {/* Button lands last */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 1.70, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <button
+            className="relative bg-[#37322F] text-white px-8 py-3 rounded-full font-medium hover:bg-[#4a443f] transition-all duration-300"
+            onClick={() => setIsModalOpen(true)}
+          >
+            Join for free
+          </button>
+        </motion.div>
       </motion.div>
 
       <AnimatePresence>
