@@ -3,6 +3,13 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { MDXRemote } from 'next-mdx-remote/rsc'
 import { getAllPosts, getPost } from '@/lib/posts'
+import { PostImage, CaptionImage, LayoutImage } from '@/components/mdx'
+
+const mdxComponents = {
+  PostImage,
+  CaptionImage,
+  LayoutImage,
+}
 
 interface Props {
   params: { slug: string }
@@ -67,7 +74,7 @@ export default function PostPage({ params }: Props) {
 
       {/* Content */}
       <article className="prose-log">
-        <MDXRemote source={post.content} />
+        <MDXRemote source={post.content} components={mdxComponents} />
       </article>
     </div>
   )

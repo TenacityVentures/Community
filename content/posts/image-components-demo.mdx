@@ -1,0 +1,99 @@
+---
+title: "Image Layouts Demo"
+date: "2026-03-14"
+description: "A reference post showing all available image components and layouts."
+tags: ["meta", "demo"]
+published: true
+---
+
+This post is a visual reference for all image components available in MDX posts. Set `published: true` to preview it live.
+
+---
+
+## PostImage — Basic full-width image
+
+No caption, just the image at full column width.
+
+<PostImage src="/tenacitylogosmall.jpeg" alt="Tenacity logo" />
+
+---
+
+## CaptionImage — Image with caption
+
+Always shows a caption below.
+
+<CaptionImage
+  src="/tenacitylogosmall.jpeg"
+  alt="Tenacity logo"
+  caption="The Tenacity mark. Small, distinct, recognisable."
+/>
+
+---
+
+## LayoutImage — Full (default)
+
+Same as PostImage but supports an optional caption.
+
+<LayoutImage
+  src="/tenacitylogosmall.jpeg"
+  alt="Full layout"
+  caption="Optional caption on the full layout."
+/>
+
+---
+
+## LayoutImage — Wide
+
+Breaks out of the content column. Good for panoramic shots or diagrams.
+
+<LayoutImage
+  src="/tenacitylogosmall.jpeg"
+  alt="Wide layout"
+  layout="wide"
+  caption="This bleeds wider than the text column."
+/>
+
+---
+
+## LayoutImage — Left float
+
+Image floats left, text wraps around the right.
+
+<LayoutImage
+  src="/tenacitylogosmall.jpeg"
+  alt="Left float"
+  layout="left"
+  caption="Left float caption."
+/>
+
+This paragraph wraps around the image on desktop. On mobile it stacks vertically. You can write as much text here as needed and it will continue to flow alongside the image until it clears. Good for adding a human element to a longer section of prose without interrupting the reading flow.
+
+<div style={{ clear: 'both' }} />
+
+---
+
+## LayoutImage — Right float
+
+<LayoutImage
+  src="/tenacitylogosmall.jpeg"
+  alt="Right float"
+  layout="right"
+  caption="Right float caption."
+/>
+
+Same as left, but the image sits on the right side. Useful for alternating visual rhythm across a longer post. Text continues to wrap naturally.
+
+<div style={{ clear: 'both' }} />
+
+---
+
+## LayoutImage — Split (two images side by side)
+
+<LayoutImage
+  src="/tenacitylogosmall.jpeg"
+  alt="Left image"
+  layout="split"
+  src2="/tenacitylogosmall.jpeg"
+  alt2="Right image"
+  caption="Two images, side by side. Good for before/after or comparisons."
+/>
