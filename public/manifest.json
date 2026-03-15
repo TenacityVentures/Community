@@ -1,0 +1,29 @@
+{
+  "name": "log.10na.city",
+  "short_name": "log.",
+  "description": "Thinking out loud. Building in public.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f5f3",
+  "theme_color": "#f7f5f3",
+  "orientation": "portrait-primary",
+  "categories": ["lifestyle", "education", "news"],
+  "icons": [
+    {
+      "src": "/icon-light-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/tenacitylogosmall.jpeg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}

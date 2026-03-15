@@ -1,5 +1,5 @@
 import type React from 'react'
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Crimson_Pro } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import Link from 'next/link'
@@ -16,22 +16,28 @@ export const metadata: Metadata = {
     default: 'log.10na.city',
     template: '%s — log.10na.city',
   },
-  description: 'Essays, resources, and bold tenacity content from the 10na.city community of builders.',
+  description: 'Thinking out loud. Building in public.',
   keywords: ['founders', 'building', 'startups', 'africa', 'tenacity', 'ventures'],
   authors: [{ name: 'David Paul Conteh' }],
   creator: 'David Paul Conteh',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    title: 'log.',
+    statusBarStyle: 'default',
+  },
   openGraph: {
     type: 'website',
     locale: 'en_US',
     url: 'https://log.10na.city',
     siteName: 'log.10na.city',
     title: 'log.10na.city',
-    description: 'Essays, resources, and bold tenacity content from the 10na.city community of builders.',
+    description: 'Thinking out loud. Building in public.',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'log.10na.city',
-    description: 'Essays, resources, and bold tenacity content from the 10na.city community of builders.',
+    description: 'Thinking out loud. Building in public.',
   },
   alternates: {
     canonical: 'https://log.10na.city',
@@ -39,23 +45,33 @@ export const metadata: Metadata = {
       'application/rss+xml': 'https://log.10na.city/feed.xml',
     },
   },
-  robots: {
-    index: true,
-    follow: true,
-  },
+  robots: { index: true, follow: true },
   icons: {
     icon: '/tenacitylogosmall.jpeg',
     apple: '/tenacitylogosmall.jpeg',
   },
 }
 
+export const viewport: Viewport = {
+  themeColor: '#f7f5f3',
+  width: 'device-width',
+  initialScale: 1,
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className="scroll-smooth">
-      <body className={`${crimsonPro.variable} font-sans antialiased bg-[#f7f5f3]`}>
-        <header className="border-b border-[#37322f]/10 px-6 py-5">
+    <html lang="en" className="h-full">
+      {/*
+        App-shell layout: header and footer are fixed anchors,
+        main scrolls independently — feels native on mobile.
+      */}
+      <body
+        className={`${crimsonPro.variable} font-sans antialiased bg-[#f7f5f3] flex flex-col h-full`}
+      >
+        {/* ── Sticky header ─────────────────────────────────────── */}
+        <header className="shrink-0 border-b border-[#37322f]/10 px-6 py-5 bg-[#f7f5f3] z-10">
           <div className="max-w-2xl mx-auto flex items-center justify-between">
             <Link
               href="/"
@@ -82,15 +98,24 @@ export default function RootLayout({
             </div>
           </div>
         </header>
-        <main>{children}</main>
-        <footer className="border-t border-[#37322f]/10 px-6 py-8 mt-20">
+
+        {/* ── Scrollable content area ────────────────────────────── */}
+        <main className="flex-1 overflow-y-auto">
+          {children}
+        </main>
+
+        {/* ── Sticky footer ──────────────────────────────────────── */}
+        <footer className="shrink-0 border-t border-[#37322f]/10 px-6 py-5 bg-[#f7f5f3]">
           <div className="max-w-2xl mx-auto flex items-center justify-between text-xs text-[#37322f]/40">
-            <span style={{ fontFamily: 'var(--font-serif), serif' }}>log.10na.city</span>
+            <span style={{ fontFamily: 'var(--font-serif), serif' }}>
+              Thinking out loud. Building in public.
+            </span>
             <a href="https://10na.city" className="hover:text-[#37322f] transition-colors">
               10na.city
             </a>
           </div>
         </footer>
+
         <Analytics />
       </body>
     </html>
