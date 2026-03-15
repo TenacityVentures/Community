@@ -16,7 +16,7 @@ export default function LogPage() {
     <div className="max-w-2xl mx-auto px-6 py-16">
       <div className="mb-14">
         <h1 className="text-4xl text-[#37322f] mb-3">The Log</h1>
-        <p className="text-[#37322f]/60 text-lg">Essays, resources, and bold tenacity content.</p>
+        <p className="text-[#37322f]/60 text-lg">Thinking out loud. Building in public.</p>
       </div>
 
       {posts.length === 0 ? (
