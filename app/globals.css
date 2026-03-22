@@ -136,6 +136,31 @@
   display: none;
 }
 
+/* ── Log loading state ──────────────────────────────────────────────────── */
+@keyframes log-breathe {
+  0%, 100% { opacity: 0.25; }
+  50%       { opacity: 1;    }
+}
+
+@keyframes log-sweep {
+  0%   { transform: translateX(-150%); }
+  100% { transform: translateX(250%);  }
+}
+
+.log-loading-wordmark {
+  animation: log-breathe 2s ease-in-out infinite;
+}
+
+.log-loading-sweep {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(55, 50, 47, 0.55) 50%,
+    transparent 100%
+  );
+  animation: log-sweep 1.6s ease-in-out infinite;
+}
+
 /* MDX prose styles for log posts */
 .prose-log {
   color: #37322f;

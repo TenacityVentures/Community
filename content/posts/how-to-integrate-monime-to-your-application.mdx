@@ -1,0 +1,224 @@
+---
+title: "How to Integrate Monime to Your Application"
+date: "2026-03-14"
+description: "A step-by-step guide to integrating Monime into your application."
+tags: ["meta", "demo"]
+published: true
+---
+
+Monime is a payments infrastructure company focused on Sierra Leone and West Africa. It lets businesses accept payments from customers via:
+
+Afrimoney — mobile money on the Africell network
+Orange Money — mobile money on the Orange SL network
+Bank transfer via USSD
+The integration model is similar to Stripe Checkout: you create a session on your server, redirect the customer to Monime's hosted page, and receive webhook events when they pay (or cancel).
+
+## Prerequisites
+
+- A Monime merchant account
+- API keys (public and secret)
+- A webhook endpoint in your application
+- A way to store payment sessions (database or similar)
+
+## Step 1 — Install the Monime SDK
+
+```bash
+npm install monime-js
+```
+
+## Step 2 — Initialize the SDK
+
+```javascript
+import { MonimeClient } from 'monime-js';
+
+const monime = new MonimeClient({
+  publicKey: process.env.MONIME_PUBLIC_KEY,
+  secretKey: process.env.MONIME_SECRET_KEY,
+});
+```
+
+## Step 3 — Create a payment session
+
+```javascript
+export async function createPaymentSession(amount: number, currency: string = 'SLE') {
+  const session = await monime.checkout.createSession({
+    amount,
+    currency,
+    metadata: {
+      orderId: '12345',
+      userId: 'user-123',
+    },
+    successUrl: 'https://yourapp.com/success',
+    cancelUrl: 'https://yourapp.com/cancel',
+  });
+
+  return session;
+}
+```
+
+## Step 4 — Redirect the customer
+
+```javascript
+const session = await createPaymentSession(10000);
+
+// Redirect user to Monime's hosted page
+window.location.href = session.url;
+```
+
+## Step 5 — Handle webhooks
+
+Create a webhook endpoint in your application to receive payment notifications.
+
+```javascript
+export async function handleWebhook(request: Request) {
+  const signature = request.headers.get('monime-signature');
+  const payload = await request.json();
+
+  // Verify the webhook signature
+  if (!monime.webhooks.verifySignature(payload, signature)) {
+    return new Response('Invalid signature', { status: 400 });
+  }
+
+  // Handle different event types
+  switch (payload.type) {
+    case 'payment_intent.succeeded':
+      // Payment succeeded, update your database
+      await updateOrderStatus(payload.data.object.metadata.orderId, 'paid');
+      break;
+    case 'payment_intent.payment_failed':
+      // Payment failed, notify the user
+      await notifyUserOfPaymentFailure(payload.data.object.metadata.orderId);
+      break;
+    case 'checkout.session.completed':
+      // Checkout session completed
+      break;
+    default:
+      // Handle other event types
+      break;
+  }
+
+  return new Response('Webhook processed', { status: 200 });
+}
+```
+
+## Step 6 — Verify payment status
+
+```javascript
+export async function verifyPaymentStatus(sessionId: string) {
+  const session = await monime.checkout.retrieveSession(sessionId);
+
+  return session.status;
+}
+```
+
+## Step 7 — Handle errors
+
+```javascript
+try {
+  const session = await createPaymentSession(10000);
+  window.location.href = session.url;
+} catch (error) {
+  console.error('Error creating payment session:', error);
+  // Show error to user
+}
+```
+
+## Example: Full payment flow
+
+```javascript
+// 1. Create payment session
+const session = await monime.checkout.createSession({
+  amount: 10000,
+  currency: 'SLE',
+  metadata: {
+    orderId: '12345',
+    userId: 'user-123',
+  },
+  successUrl: 'https://yourapp.com/success',
+  cancelUrl: 'https://yourapp.com/cancel',
+});
+
+// 2. Redirect user to Monime
+window.location.href = session.url;
+
+// 3. Handle webhook when payment completes
+// (Your webhook endpoint receives this automatically)
+
+// 4. Verify payment status after redirect
+const finalStatus = await verifyPaymentStatus(session.id);
+
+if (finalStatus === 'paid') {
+  // Update order status in your database
+  await updateOrderStatus('12345', 'paid');
+  // Show success message to user
+} else {
+  // Show error message to user
+}
+```
+
+## Important Notes
+
+- Always use environment variables for API keys
+- Never commit secret keys to version control
+- Implement proper error handling and logging
+- Test with both test and production keys
+- Keep your webhook endpoint secure
+- Handle different payment statuses correctly
+- Consider adding retry logic for failed payments
+- Implement rate limiting for API requests
+- Use HTTPS for all payment-related communication
+- Store sensitive data securely
+- Follow Monime's API documentation for the latest updates
+
+## Testing
+
+Monime provides a test mode for development. Use test API keys to simulate payments without real transactions.
+
+```javascript
+// Test mode
+const monime = new MonimeClient({
+  publicKey: process.env.MONIME_TEST_PUBLIC_KEY,
+  secretKey: process.env.MONIME_TEST_SECRET_KEY,
+  testMode: true,
+});
+```
+
+## Production
+
+When moving to production:
+
+1. Use your actual production API keys
+2. Set up a production webhook endpoint
+3. Configure proper error handling and monitoring
+4. Test with real transactions
+5. Implement security best practices
+6. Set up proper logging and analytics
+7. Configure rate limiting and caching
+8. Implement proper authentication and authorization
+9. Set up proper backup and recovery procedures
+10. Follow Monime's production guidelines
+
+## Common Issues
+
+- **Invalid signature** — Check your webhook signature verification
+- **Payment not processing** — Verify API keys and network connectivity
+- **Webhook not firing** — Check your webhook URL and Monime configuration
+- **Session not found** — Verify session ID is correct
+- **Currency mismatch** — Ensure currency is supported
+- **Network errors** — Implement retry logic and error handling
+- **Security issues** — Use HTTPS and proper authentication
+- **Rate limiting** — Implement proper caching and rate limiting
+- **Data validation** — Validate all input data
+- **Error handling** — Implement proper error handling and logging
+
+## Additional Resources
+
+- [Monime Documentation](https://docs.monime.io)
+- [Monime API Reference](https://docs.monime.io/api)
+- [Monime Webhooks](https://docs.monime.io/webhooks)
+- [Monime SDKs](https://docs.monime.io/sdks)
+- [Monime Support](https://docs.monime.io/support)
+
+## Conclusion
+
+Integrating Monime into your application can help you accept payments from customers in Sierra Leone and West Africa. By following these steps, you can quickly and securely integrate Monime's payment infrastructure into your application.
