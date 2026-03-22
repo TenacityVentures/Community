@@ -67,6 +67,28 @@ export function getPostsPage(page: number): PostMeta[] {
   return all.slice(start, start + POSTS_PER_PAGE)
 }
 
+/**
+ * Returns up to `count` posts related to the given slug by shared tags.
+ * Falls back to recent posts if there aren't enough tag matches.
+ */
+export function getRelatedPosts(currentSlug: string, tags: string[], count = 3): PostMeta[] {
+  const all = getAllPosts().filter((p) => p.slug !== currentSlug)
+
+  if (tags.length === 0) return all.slice(0, count)
+
+  const scored = all.map((p) => ({
+    post: p,
+    score: p.tags.filter((t) => tags.includes(t)).length,
+  }))
+
+  const matches  = scored.filter(({ score }) => score > 0).sort((a, b) => b.score - a.score)
+  const fallback = scored.filter(({ score }) => score === 0)
+
+  return [...matches, ...fallback]
+    .slice(0, count)
+    .map(({ post }) => post)
+}
+
 export function getPost(slug: string): Post | null {
   const filePath = path.join(POSTS_DIR, `${slug}.mdx`)
   if (!fs.existsSync(filePath)) return null

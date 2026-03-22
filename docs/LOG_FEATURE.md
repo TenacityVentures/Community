@@ -25,12 +25,15 @@ content/
   posts/                          ← MDX source files (one file = one post)
 
 app/
-  layout.tsx                      ← root layout: header, footer, global metadata
-  template.tsx                    ← page transition animation (Framer Motion)
-  page.tsx                        ← homepage — post list
+  layout.tsx                      ← root layout: header, footer, PWA meta, app shell
+  loading.tsx                     ← Tenacity-branded loading state (log. animation)
+  page.tsx                        ← homepage — paginated post list (page 1)
   [slug]/
-    page.tsx                      ← post detail + MDX renderer
+    page.tsx                      ← post detail + MDX renderer + author + related
     opengraph-image.tsx           ← dynamic OG image per post (edge)
+  page/
+    [page]/
+      page.tsx                    ← paginated list pages (/page/2, /page/3 …)
   tag/
     [tag]/
       page.tsx                    ← filtered post list by tag
@@ -44,17 +47,28 @@ components/
     PostImage.tsx                 ← basic full-width image
     CaptionImage.tsx              ← image with caption
     LayoutImage.tsx               ← image with 5 layout modes
+    Heading.tsx                   ← h2/h3 with anchor # links for deep linking
     index.ts                      ← barrel export
+  log/
+    author-card.tsx               ← author bio card shown below each post
+    related-posts.tsx             ← "Continue reading" section (tag-matched)
+    searchable-posts.tsx          ← client component: search input + post list
+    pagination.tsx                ← prev/next nav (/ → /page/2 → /page/3 …)
 
 lib/
-  posts.ts                        ← core data layer: reads, parses, filters posts
+  posts.ts                        ← core data layer: reads, parses, filters, paginates posts
+  authors.ts                      ← author registry (slug → Author object)
 
-app/
-  globals.css                     ← .prose-log class for post body typography
+public/
+  manifest.json                   ← PWA manifest (installable as mobile app)
+  people/                         ← author profile images
 
-PUBLISHING.md                     ← author-facing publishing guide
 docs/
-  log-feature.md                  ← this file
+  LOG_FEATURE.md                  ← this file
+  PUBLISHING.md                   ← author-facing publishing guide
+
+CLAUDE.md                         ← quick context for AI assistants
+NOTE.md                           ← ongoing build notes and backlog
 ```
 
 ---
@@ -66,28 +80,61 @@ Single source of truth for all post data. Nothing else touches the filesystem.
 **Exports:**
 
 ```ts
+const POSTS_PER_PAGE = 10
+
 interface PostMeta {
-  slug: string        // filename without .mdx — becomes the URL
-  title: string       // from frontmatter
-  date: string        // YYYY-MM-DD from frontmatter — used for sorting
-  description: string // from frontmatter — used in cards and <meta>
-  tags: string[]      // from frontmatter
-  published: boolean  // false = draft, never served
-  readingTime: string // auto-calculated ("3 min read")
+  slug: string         // filename without .mdx — becomes the URL
+  title: string
+  date: string         // YYYY-MM-DD — used for sorting
+  description: string  // used in cards and <meta>
+  tags: string[]
+  published: boolean   // false = draft, never served
+  readingTime: string  // auto-calculated ("3 min read")
+  authorSlug?: string  // raw slug from frontmatter e.g. "david-conteh"
+  author?: Author      // resolved Author object from lib/authors.ts
 }
 
 interface Post extends PostMeta {
-  content: string     // raw MDX string passed to MDXRemote
+  content: string      // raw MDX string passed to MDXRemote
 }
 
-getAllPosts(): PostMeta[]   // published only, sorted newest first
-getPost(slug): Post | null // single post by slug, null if missing/unpublished
+getAllPosts(): PostMeta[]                               // all published, newest first
+getPostsPage(page: number): PostMeta[]                 // one page (POSTS_PER_PAGE items)
+getTotalPages(): number
+getPostCount(): number
+getPost(slug: string): Post | null
+getRelatedPosts(slug: string, tags: string[], count?: number): PostMeta[]
 ```
 
-**To add a new frontmatter field:**
-1. Add it to `PostMeta` interface
-2. Read it from `data` in both `getAllPosts()` and `getPost()`
-3. Use it in any page
+**`getRelatedPosts`** ranks by number of shared tags. Falls back to recent posts when there aren't enough tag matches. Never includes the current post.
+
+---
+
+## Authors — `lib/authors.ts`
+
+Static registry. Each author is an object keyed by slug.
+
+```ts
+interface Author {
+  slug: string
+  name: string
+  title: string
+  bio: string
+  image: string   // path relative to /public e.g. "/people/davidconteh.png"
+  social: {
+    twitter?: string   // full URL: "https://x.com/handle"
+    github?: string
+    linkedin?: string
+    website?: string
+  }
+}
+```
+
+**To add an author:**
+1. Add their entry to `AUTHORS` in `lib/authors.ts`
+2. Use their slug as `author: their-slug` in MDX frontmatter
+
+Authors are resolved at parse time in `lib/posts.ts` — no runtime lookup.
 
 ---
 
@@ -95,14 +142,52 @@ getPost(slug): Post | null // single post by slug, null if missing/unpublished
 
 | URL | File | Notes |
 |---|---|---|
-| `/` | `app/page.tsx` | Post list, all published posts |
+| `/` | `app/page.tsx` | Page 1 of post list |
+| `/page/:n` | `app/page/[page]/page.tsx` | Pages 2+ |
 | `/:slug` | `app/[slug]/page.tsx` | Post detail, statically generated |
+| `/:slug#section` | — | Deep link to heading anchor |
 | `/tag/:tag` | `app/tag/[tag]/page.tsx` | Filtered list, statically generated |
 | `/feed.xml` | `app/feed.xml/route.ts` | RSS 2.0 feed |
 | `/sitemap.xml` | `app/sitemap.ts` | Auto-generated by Next.js |
 | `/robots.txt` | `app/robots.ts` | Auto-generated by Next.js |
 
-All post and tag pages are **statically generated at build time** — zero runtime overhead, instant page loads.
+All post, page, and tag routes are **statically generated at build time**.
+
+---
+
+## Pagination
+
+- **10 posts per page** (`POSTS_PER_PAGE` constant in `lib/posts.ts`)
+- Page 1 → `/` (root)
+- Page 2+ → `/page/2`, `/page/3` etc.
+- `generateStaticParams` pre-renders all pages at build time
+- Invalid pages return 404
+
+---
+
+## Search
+
+Built in `SearchablePosts` — **currently off**. To enable:
+
+```tsx
+// app/page.tsx and app/page/[page]/page.tsx
+<SearchablePosts posts={posts} allPosts={allPosts} searchEnabled={true} />
+```
+
+When active, search covers **all posts across all pages** (`allPosts` prop), not just the current page. Filters by title, description, tags, and author name.
+
+---
+
+## Heading Deep Links
+
+`h2` and `h3` in every post are rendered via `components/mdx/Heading.tsx`. Each heading:
+- Gets an `id` auto-generated from its text content (slugified)
+- Shows a `#` anchor link on hover
+- Has `scroll-mt-20` to offset the sticky header on jump
+
+**Usage:** `log.10na.city/post-slug#section-heading`
+
+No configuration needed — works automatically for all `## headings` in MDX.
 
 ---
 
@@ -110,39 +195,39 @@ All post and tag pages are **statically generated at build time** — zero runti
 
 ### Metadata
 
-Root metadata is defined in `app/layout.tsx`:
-- `metadataBase: new URL('https://log.10na.city')` — required for absolute OG image URLs
-- Title template: `'%s — log.10na.city'` — post titles slot in automatically
-- Full OpenGraph + Twitter card on every page
-- RSS link in `<head>` via `alternates.types`
+Root metadata in `app/layout.tsx`:
+- `metadataBase: new URL('https://log.10na.city')` — required for absolute OG URLs
+- Title template: `'%s — log.10na.city'`
+- Full OpenGraph + Twitter card
+- `manifest: '/manifest.json'` for PWA
 
 Per-post metadata in `app/[slug]/page.tsx`:
-```ts
-export async function generateMetadata({ params }) {
-  return {
-    title: post.title,                   // → "Post Title — log.10na.city"
-    description: post.description,
-    openGraph: { type: 'article', publishedTime: post.date, tags: post.tags },
-    alternates: { canonical: `https://log.10na.city/${post.slug}` },
-  }
-}
-```
+- `openGraph.type: 'article'` with `publishedTime`, `authors`, `tags`
+- `alternates.canonical`
+- JSON-LD `BlogPosting` structured data
 
 ### OG Images
 
-`app/[slug]/opengraph-image.tsx` generates a 1200×630 PNG per post at build time using `next/og` (edge runtime). Design: cream background, post title, tags, date — matches brand.
-
-The default site OG image (`/og-default.png`) should be added to `public/` manually.
+`app/[slug]/opengraph-image.tsx` generates 1200×630 PNG per post at build time.
 
 ### Sitemap
 
-`app/sitemap.ts` generates `/sitemap.xml` automatically. Includes:
-- Homepage with `priority: 1`, `changeFrequency: weekly`
-- Every published post with `priority: 0.8`, `changeFrequency: monthly`
+`app/sitemap.ts` → `/sitemap.xml`. Includes homepage + every published post.
 
 ### RSS
 
-`app/feed.xml/route.ts` serves valid RSS 2.0 XML at `/feed.xml`. Linked in `<head>` via metadata. Shown in header nav. Cached for 1 hour.
+`app/feed.xml/route.ts` → `/feed.xml`. RSS 2.0, linked in `<head>`, shown in header.
+
+---
+
+## PWA
+
+The app is installable as a native-feeling mobile app:
+- `public/manifest.json` — name, icons, `display: standalone`, theme colour
+- `appleWebApp` meta in `app/layout.tsx` — iOS home screen support
+- `viewport.themeColor` — status bar colour on Android
+
+App shell layout: header and footer are fixed anchors (`shrink-0` in a `flex flex-col h-full` body). Only `<main>` scrolls (`flex-1 overflow-y-auto`).
 
 ---
 
@@ -154,6 +239,8 @@ const mdxComponents = {
   PostImage,
   CaptionImage,
   LayoutImage,
+  h2: H2,   // anchor headings
+  h3: H3,
 }
 ```
 
@@ -193,11 +280,19 @@ Paragraph that wraps...
 
 ## Typography — `.prose-log`
 
-Post body is wrapped in `<article className="prose-log">`. Defined in `app/globals.css` (not @tailwindcss/typography — deliberate, for full control).
+Post body is wrapped in `<article className="prose-log">`. Defined in `app/globals.css`.
 
 Base: `font-serif`, `1.125rem`, `line-height: 1.75`, color `#37322f`.
 
-Styled: `p h2 h3 ul ol li strong a blockquote code pre hr`
+Styled elements: `p h2 h3 ul ol li strong a blockquote code pre hr`
+
+---
+
+## Related Posts
+
+`getRelatedPosts(slug, tags, count = 3)` in `lib/posts.ts` returns up to 3 related posts, ranked by shared tag count. Falls back to recent posts when there aren't enough matches.
+
+Rendered by `components/log/related-posts.tsx` — appears after the author card at the bottom of each post under "Continue reading".
 
 ---
 
@@ -211,10 +306,6 @@ Styled: `p h2 h3 ul ol li strong a blockquote code pre hr`
 
 ### Publish workflow
 ```bash
-# Write post
-echo "---\ntitle: ...\npublished: true\n---" > content/posts/my-post.mdx
-
-# Push → Vercel auto-deploys
 git add content/posts/my-post.mdx
 git commit -m "publish: my post title"
 git push origin feature/log

@@ -2,11 +2,20 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { MDXRemote } from 'next-mdx-remote/rsc'
-import { getAllPosts, getPost } from '@/lib/posts'
-import { PostImage, CaptionImage, LayoutImage } from '@/components/mdx'
+import { getAllPosts, getPost, getRelatedPosts } from '@/lib/posts'
+import { PostImage, CaptionImage, LayoutImage, H2, H3 } from '@/components/mdx'
 import { AuthorCard } from '@/components/log/author-card'
+import { RelatedPosts } from '@/components/log/related-posts'
 
-const mdxComponents = { PostImage, CaptionImage, LayoutImage }
+const mdxComponents = {
+  PostImage,
+  CaptionImage,
+  LayoutImage,
+  // Heading overrides — adds anchor `#` links + scroll-offset for sticky header.
+  // Deep links work as: log.10na.city/post-slug#section-heading
+  h2: H2,
+  h3: H3,
+}
 
 interface Props {
   params: { slug: string }
@@ -77,11 +86,11 @@ function PostJsonLd({ post }: { post: NonNullable<ReturnType<typeof getPost>> })
   )
 }
 
-// Fully server-rendered — MDXRemote/rsc renders the complete post HTML at
-// build time, so crawlers and social bots receive the full content.
 export default function PostPage({ params }: Props) {
   const post = getPost(params.slug)
   if (!post || !post.published) notFound()
+
+  const related = getRelatedPosts(post.slug, post.tags)
 
   return (
     <>
@@ -139,6 +148,9 @@ export default function PostPage({ params }: Props) {
 
         {/* Author card */}
         {post.author && <AuthorCard author={post.author} />}
+
+        {/* Related posts */}
+        <RelatedPosts posts={related} />
       </div>
     </>
   )
